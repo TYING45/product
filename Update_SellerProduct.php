@@ -3,7 +3,7 @@
 $github_owner = "TYING45";
 $github_repo = "product";
 $github_branch = "main";
-$github_token = "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";  // ❗建議只用測試帳號或短效 PAT
+$github_token = "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";  // ❗建議只用測試帳號或短效 PAT
 
 // 上傳圖片到 GitHub 的函式
 function uploadImageToGitHub($owner, $repo, $branch, $token, $image_tmp_path, $remote_path) {
