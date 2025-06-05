@@ -97,53 +97,78 @@ function keepURL() {
     </div>
 
 <!-- id  權限管理 -->
-    <main class="main">
-    <p><b><font size="5">會員管理系統</font></b></p>
-    <?php
-    if ($rows == 0) {
-        echo "查無資料";
-    } else {
-        echo "目前有 " . $rows . " 筆資料";
-    }
-    ?>
-    <form method="get" action="">
-        <select name="num">
-            <option value="1">1</option>
-            <option value="2" selected>2</option>
+   <main class="main">
+    <h2>賣家訂單管理</h2>
+
+    <form method="GET" action="Seller_Order.php">
+        <input name="search" type="text" placeholder="訂單編號或會員姓名" size="20"
+               value="<?= htmlspecialchars($search_keyword) ?>">
+        <select name="year">
+            <option value="">全部年</option>
+            <?php
+            $currentYear = date("Y");
+            for ($y = $currentYear; $y >= $currentYear - 5; $y--) {
+                $selected = ($year == $y) ? 'selected' : '';
+                echo "<option value='$y' $selected>$y 年</option>";
+            }
+            ?>
         </select>
-        <input name="keyword" type="text" id="keyword" placeholder="請輸入關鍵字" size="12">
-        <input type="submit" name="import" id="button0" value="查詢">
-        <input type="button" onclick="location.href='CSV_Order.php'" value="輸出CSV">
+
+        <select name="month">
+            <option value="">全部月</option>
+            <?php
+            for ($m = 1; $m <= 12; $m++) {
+                $monthVal = str_pad($m, 2, '0', STR_PAD_LEFT);
+                $selected = ($month == $monthVal) ? 'selected' : '';
+                echo "<option value='$monthVal' $selected>$m 月</option>";
+            }
+            ?>
+        </select>
+
+        <input type="submit" value="查詢">
     </form>
-    <table border="1">
+
+    <table border="1" cellpadding="5" cellspacing="0" style="margin-top: 1rem; width: 100%;">
+        <thead>
         <tr>
-            <th>訂單ID</th>
-            <th>ID</th>
-            <th>訂單日期</th>
-            
-            <th>訂購人</th>
-            <th>付款方式</th>
-            <th>訂單金額</th>
-            <th>處理進度</th>
-            <th>修改</th>
-            <th>刪除</th>
+            <th>訂單編號</th>
+            <th>訂購日期</th>
+            <th>付款狀態</th>
+            <th>訂單狀態</th>
+            <th>總金額</th>
+            <th>操作</th>
         </tr>
-        <?php
-        while ($row = $result->fetch_assoc()) {
-            echo "<tr>";
-            echo "<td>" . $row["id"] . "</td>";
-            echo "<td>" . $row["Order_ID"] . "</td>";
-            echo "<td>" . $row["Order_Date"] . "</td>";
-            echo "<td>" . $row["billing_name"] . "</td>";
-            echo "<td>" . $row["Payment_method"] . "</td>";
-            echo "<td>" . $row["total_price"] . "</td>";
-            echo "<td>" . $row["Order_status"] . "</td>";
-            echo "<td><a href='Update_Order.php?Order_ID=" . urlencode($row["Order_ID"]) . "'>詳細</a></td>";
-            echo "<td><a href='Del_Order.php?id=" . $row["Order_ID"] . "'>刪除</a></td>";
-            echo "</tr>";
-        }
-        ?>
+        </thead>
+        <tbody>
+        <?php if ($result->num_rows === 0): ?>
+            <tr><td colspan="7" style="text-align:center;">沒有資料</td></tr>
+        <?php else: ?>
+            <?php while ($order = $result->fetch_assoc()): ?>
+                <tr>
+                    <td><?= htmlspecialchars($order['Order_ID']) ?></td>
+                    <td><?= htmlspecialchars($order['Order_Date']) ?></td>
+                    <td><?= htmlspecialchars($order['Payment_status'] ?? '尚未付款') ?></td>
+                    <td><?= htmlspecialchars($order['Order_status'] ?? '未處理') ?></td>
+                    <td><?= htmlspecialchars(number_format(($order['total_price'] ?? 0) + ($order['shipping_fee'] ?? 0), 2)) ?></td>
+                    <td><a href="UpdateSeller_Order.php?Order_ID=<?= urlencode($order['Order_ID']) ?>">查看</a></td>
+                </tr>
+            <?php endwhile; ?>
+        <?php endif; ?>
+        </tbody>
     </table>
+
+    <div style="margin-top: 1rem;">
+        <?php if ($total_pages > 1): ?>
+            <?php for ($p = 1; $p <= $total_pages; $p++): ?>
+                <?php if ($p == $page): ?>
+                    <strong><?= $p ?></strong>
+                <?php else: ?>
+                    <a href="?page=<?= $p ?>&search=<?= urlencode($search_keyword) ?>&year=<?= urlencode($year) ?>&month=<?= urlencode($month) ?>"><?= $p ?></a>
+                <?php endif; ?>
+                &nbsp;
+            <?php endfor; ?>
+        <?php endif; ?>
+    </div>
 </main>
 <script src="JS/leftside.js"></script>
 </body>
