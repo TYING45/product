@@ -31,7 +31,6 @@ if (!empty($Seller_ID)) {
     $types .= "s";
 }
 
-// 關鍵字搜尋
 if (isset($_GET["keyword"]) && $_GET["keyword"] !== "") {
     $where .= " AND (`Product_name` LIKE ? OR `Product_ID` LIKE ? OR `Type` LIKE ?)";
     $keyword = "%" . $_GET["keyword"] . "%";
@@ -64,8 +63,20 @@ $stmt = $link->prepare($data_query);
 $stmt->bind_param($types, ...$params);
 $stmt->execute();
 $result = $stmt->get_result();
-?>
 
+// URL 參數
+function keepURL()
+{
+    $keepURL = "";
+    if (isset($_GET["keyword"])) {
+        $keepURL .= "&keyword=" . urlencode($_GET["keyword"]);
+    }
+    if (isset($_GET["cid"])) {
+        $keepURL .= "&cid=" . $_GET["cid"];
+    }
+    return $keepURL;
+}
+?>
 
 <!DOCTYPE html>
 <html lang="zh-TW">
