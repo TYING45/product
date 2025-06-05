@@ -3,14 +3,14 @@ include("sql_php.php");
 $upload_dir = "uploads/";
 
 if (isset($_POST["action"]) && $_POST["action"] == "update") {
-    if (!empty($_POST["Member_ID"]) && !empty($_POST["username"]) && !empty($_POST["password"]) &&
+    if (!empty($_POST["Member_ID"]) && !empty($_POST["password"]) &&
         !empty($_POST["Email"]) && !empty($_POST["Phone"])) {
         
-        $sqli_query = "UPDATE `member` SET `Member_name`=?, `username`=?,`password`=?, `Phone`=?, `Email`=?, `Address`=? WHERE `Member_ID`=?";
+        $sqli_query = "UPDATE `member` SET `Member_name`=?,`password`=?, `Phone`=?, `Email`=?, `Address`=? WHERE `Member_ID`=?";
         
         $stmt = $link->prepare($sqli_query);
         if ($stmt) {
-           $stmt->bind_param("sssssss", $_POST["Member_name"], $_POST["username"], $_POST["password"],
+           $stmt->bind_param("ssssss", $_POST["Member_name"],  $_POST["password"],
             $_POST["Phone"], $_POST["Email"], $_POST["Address"], $_POST["Member_ID"]);
 
             $stmt->execute();
@@ -28,11 +28,11 @@ if (isset($_POST["action"]) && $_POST["action"] == "update") {
 if (isset($_GET["id"])) {
     $Member_ID = $_GET["id"];
 
-    $sql_select = "SELECT Member_name, username, password, Phone, Email, Address FROM member WHERE Member_ID = ?";
+    $sql_select = "SELECT Member_name, password, Phone, Email, Address FROM member WHERE Member_ID = ?";
     $stmt = $link->prepare($sql_select);
     $stmt->bind_param("s", $Member_ID);
     $stmt->execute();
-    $stmt->bind_result($Member_name, $username, $password, $Phone, $Email, $Address);
+    $stmt->bind_result($Member_name, $password, $Phone, $Email, $Address);
     if ($stmt->fetch()) {
         $stmt->close();
     }
@@ -57,9 +57,6 @@ if (isset($_GET["id"])) {
 
     <label class="labels2">姓名:</label>
     <input class="input2" type="text" name="Member_name" value="<?php echo $Member_name; ?>"><br>
-
-    <label class="labels3">會員帳號:</label>
-    <input class="input3" type="text" name="username" value="<?php echo $username; ?>"><br>
 
     <label class="labels4">會員密碼:</label> 
     <input class="input4" type="text" name="password" value="<?php echo $password; ?>"><br>
