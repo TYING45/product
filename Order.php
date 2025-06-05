@@ -169,7 +169,7 @@ $result = $stmt->get_result();
                     <td><?= htmlspecialchars($order['Payment_status'] ?? '尚未付款') ?></td>
                     <td><?= htmlspecialchars($order['Order_status'] ?? '未處理') ?></td>
                     <td><?= htmlspecialchars(number_format(($order['total_price'] ?? 0) + ($order['shipping_fee'] ?? 0), 2)) ?></td>
-                    <td><a href="UpdateSeller_Order.php?Order_ID=<?= urlencode($order['Order_ID']) ?>">查看</a></td>
+                    <td><a href="Update_Order.php?Order_ID=<?= urlencode($order['Order_ID']) ?>">查看</a></td>
                 </tr>
             <?php endwhile; ?>
         <?php endif; ?>
