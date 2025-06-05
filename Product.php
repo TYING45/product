@@ -175,7 +175,7 @@ function keepURL() {
                         echo $statusLabel . "<br>";
                         if ($isAdmin):
                     ?>
-                        <a href="Seller_ToggleStatus.php?id=<?= $row['Product_ID'] ?>"
+                        <a href="ToggleStatus.php?id=<?= $row['Product_ID'] ?>"
                            onclick="return confirm('確定要切換為【<?= $nextStatusLabel ?>】嗎？');">
                             切換為 <?= $nextStatusLabel ?>
                         </a>
