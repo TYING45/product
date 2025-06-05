@@ -3,7 +3,7 @@ session_start();
 include("sql_php.php");
 
 // 檢查是否登入且為賣家
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'seller') {
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     echo "未授權訪問。請先登入為賣家帳號。";
     exit();
 }
