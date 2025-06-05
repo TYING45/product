@@ -97,8 +97,8 @@ ob_end_flush(); // 結束輸出緩衝
     <input type="hidden" name="action" value="update">
     <input class="input1" type="text" name="Product_ID" value="<?php echo $Product_ID; ?>" readonly><br>
       
-    <?php if (!empty($Image)): ?>
-        <img src="uploads/<?php echo $Image; ?>" alt="Image">
+   <?php if (!empty($Image)): ?>
+    <img src="uploads/<?php echo htmlspecialchars($Image); ?>" alt="Image" style="max-width:200px;">
     <?php endif; ?>
     <input type="file" name="Image"><br> 
     <label class="labels2">商品名稱:</label>
