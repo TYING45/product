@@ -2,24 +2,36 @@
 session_start();
 include("sql_php.php");
 
-// 檢查是否登入且為賣家
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'seller') {
-    echo "未授權訪問。請先登入為賣家帳號。";
+// 檢查是否登入，允許賣家或管理員進入
+if (!isset($_SESSION['role']) || ($_SESSION['role'] !== 'seller' && $_SESSION['role'] !== 'admin')) {
+    echo "未授權訪問。請先登入為賣家或管理員帳號。";
     exit();
 }
 
-$Seller_ID = $_SESSION['Seller_ID'];
+// 取得 Seller_ID，admin 可看全部或指定 Seller_ID
+if ($_SESSION['role'] === 'seller') {
+    $Seller_ID = $_SESSION['Seller_ID'];
+} elseif ($_SESSION['role'] === 'admin') {
+    $Seller_ID = isset($_GET['Seller_ID']) ? $_GET['Seller_ID'] : null;
+}
 
 // 每頁顯示筆數
 $pageRow_records = 10;
 $num_pages = isset($_GET['page']) ? intval($_GET['page']) : 1;
 $startRow_records = ($num_pages - 1) * $pageRow_records;
 
-// 設定查詢條件（包含 Seller_ID 與搜尋）
-$where = " WHERE Seller_ID = ?";
-$params = [$Seller_ID];
-$types = "s";  // Seller_ID 是字串
+// 設定查詢條件
+$where = " WHERE 1";
+$params = [];
+$types = "";
 
+if (!empty($Seller_ID)) {
+    $where .= " AND Seller_ID = ?";
+    $params[] = $Seller_ID;
+    $types .= "s";
+}
+
+// 關鍵字搜尋
 if (isset($_GET["keyword"]) && $_GET["keyword"] !== "") {
     $where .= " AND (`Product_name` LIKE ? OR `Product_ID` LIKE ? OR `Type` LIKE ?)";
     $keyword = "%" . $_GET["keyword"] . "%";
@@ -32,7 +44,9 @@ if (isset($_GET["keyword"]) && $_GET["keyword"] !== "") {
 // 查詢總筆數
 $total_query = "SELECT COUNT(*) FROM `product`" . $where;
 $stmt = $link->prepare($total_query);
-$stmt->bind_param($types, ...$params);
+if (!empty($types)) {
+    $stmt->bind_param($types, ...$params);
+}
 $stmt->execute();
 $stmt->bind_result($total_records);
 $stmt->fetch();
@@ -50,20 +64,8 @@ $stmt = $link->prepare($data_query);
 $stmt->bind_param($types, ...$params);
 $stmt->execute();
 $result = $stmt->get_result();
-
-// URL 參數
-function keepURL()
-{
-    $keepURL = "";
-    if (isset($_GET["keyword"])) {
-        $keepURL .= "&keyword=" . urlencode($_GET["keyword"]);
-    }
-    if (isset($_GET["cid"])) {
-        $keepURL .= "&cid=" . $_GET["cid"];
-    }
-    return $keepURL;
-}
 ?>
+
 
 <!DOCTYPE html>
 <html lang="zh-TW">
