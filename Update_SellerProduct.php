@@ -17,16 +17,44 @@ if (!is_dir($upload_dir)) {
     }
 }
 
-// 將圖片上傳到 GitHub 的函式
-function uploadImageToGitHub($owner, $repo, $branch, $token, $local_path, $remote_path) {
+// 取得 GitHub 檔案 SHA（如果檔案存在）
+function getGitHubFileSha($owner, $repo, $branch, $token, $remote_path) {
+    $url = "https://api.github.com/repos/$owner/$repo/contents/$remote_path?ref=$branch";
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        "Authorization: token $token",
+        "User-Agent: PHP-script",
+        "Content-Type: application/json"
+    ]);
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($httpCode == 200) {
+        $json = json_decode($response, true);
+        return $json['sha'] ?? null;
+    }
+    return null;
+}
+
+// 將圖片上傳或更新到 GitHub
+function uploadOrUpdateImageToGitHub($owner, $repo, $branch, $token, $local_path, $remote_path) {
     $content = base64_encode(file_get_contents($local_path));
     $url = "https://api.github.com/repos/$owner/$repo/contents/$remote_path";
 
+    $sha = getGitHubFileSha($owner, $repo, $branch, $token, $remote_path);
+
     $data = [
-        "message" => "Add image $remote_path via PHP script",
+        "message" => ($sha ? "Update image $remote_path via PHP script" : "Add image $remote_path via PHP script"),
         "branch" => $branch,
         "content" => $content
     ];
+
+    if ($sha) {
+        $data['sha'] = $sha;
+    }
 
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
@@ -47,7 +75,7 @@ function uploadImageToGitHub($owner, $repo, $branch, $token, $local_path, $remot
 
 if (isset($_POST["action"]) && $_POST["action"] == "update") {
     if (!empty($_POST["Product_ID"]) && !empty($_POST["Product_name"]) && !empty($_POST["price"]) &&
-        !empty($_POST["quantity"]) && !empty($_POST["Product_introduction"]) && !empty($_POST["Type"])) {
+        isset($_POST["quantity"]) && !empty($_POST["Product_introduction"]) && !empty($_POST["Type"])) {
         
         $image_name = "";
 
@@ -63,8 +91,8 @@ if (isset($_POST["action"]) && $_POST["action"] == "update") {
                     die("❌ 錯誤：無法移動上傳圖片，請確認 uploads/ 資料夾的權限。");
                 }
 
-                // 上傳圖片到 GitHub
-                list($code, $res) = uploadImageToGitHub(
+                // 上傳或更新圖片到 GitHub
+                list($code, $res) = uploadOrUpdateImageToGitHub(
                     $github_owner,
                     $github_repo,
                     $github_branch,
@@ -73,10 +101,7 @@ if (isset($_POST["action"]) && $_POST["action"] == "update") {
                     "uploads/" . $image_name
                 );
 
-                if ($code == 201) {
-                    // 成功
-                    // 可做其他處理，或紀錄log
-                } else {
+                if ($code != 201 && $code != 200) {
                     die("❌ GitHub 上傳圖片失敗，HTTP 狀態碼：$code，回應：$res");
                 }
 
@@ -153,7 +178,8 @@ ob_end_flush();
     <input class="input1" type="text" name="Product_ID" value="<?php echo htmlspecialchars($Product_ID); ?>" readonly><br>
       
     <?php if (!empty($Image)): ?>
-        <img src="uploads/<?php echo htmlspecialchars($Image); ?>" alt="Image" style="max-width:200px;">
+        <!-- 用 GitHub Raw 連結顯示圖片 -->
+        <img src="https://raw.githubusercontent.com/<?php echo htmlspecialchars($github_owner) ?>/<?php echo htmlspecialchars($github_repo) ?>/<?php echo htmlspecialchars($github_branch) ?>/uploads/<?php echo htmlspecialchars($Image); ?>" alt="Image" style="max-width:200px;">
     <?php endif; ?>
     <input type="file" name="Image"><br> 
 
