@@ -1,0 +1,71 @@
+body {
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    flex-direction: column;
+    margin: 0;
+    font-family: sans-serif;
+}
+
+form {
+    width: 400px; 
+    border: 1px solid #e1e4eb;
+    padding: 20px; 
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+
+label {
+    color: #555;
+    font-size: 14px;
+    flex: 0 0 80px;
+    margin-right: 10px; 
+}
+
+input {
+    flex: 1;
+    border: 1px solid #ccc;
+    padding: 8px;
+    border-radius: 5px;
+    font-size: 13px;
+}
+
+input:focus {
+    border-color: #6a11cb;
+    outline: none;
+    box-shadow: 0 0 4px rgba(106, 17, 203, 0.2);
+}
+
+button {
+    float: right;
+    background: linear-gradient(45deg, #4CAF50, #087f23);
+    padding: 8px 12px;
+    color: #fff;
+    border-radius: 4px;
+    border: none;
+    font-size: 13px;
+    cursor: pointer;
+    transition: opacity 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+    opacity: 0.85;
+    transform: scale(1.03);
+}
+
+button:active {
+    transform: scale(0.95);
+}
+
+h1 {
+    color: #fff;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
+    margin-bottom: 15px; 
+    font-size: 20px;
+}
+
+/*------忘記密碼、註冊CSS-----*/

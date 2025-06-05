@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="CSS/leftside.css">
+    <link rel="stylesheet" href="CSS/topmenu.css">
+    <link href="CSS/form.css" rel="stylesheet" type="text/css">
+    <title>訂購資訊</title>
+    <style>
+        body {
+        padding-top: 60px; /* 預留空間，避免內容被擋住 */
+    }
+        .order-container {
+            width: 90%;
+            max-width: 800px;
+            margin: auto;
+            border: 1px solid #ccc;
+            background-color: white;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .order-header {
+            background-color: #2d80b3;
+            color: white;
+            padding: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: left;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table td,th{
+            border: 1px solid #000;
+            padding: 12px;
+        }
+
+        .label {
+            background-color: #ddd;
+            font-weight: bold;
+            width: 15%;
+            text-align: right;
+        }
+        .content {
+            background-color: #f9f9f9;
+            text-align: left;
+        }
+        .label1 {
+            background-color: #ddd;
+            font-weight: bold;
+            width: 15%;
+            text-align: center;
+        }
+        .content1{
+            background-color: #f9f9f9;
+            text-align: center;
+            width: 100%;
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="top-menu">
+    <ul class="topmenu">
+        <button onclick="toggleSidebar()" class="img-button"></button>
+        <li><a href="#">網頁前端</a></li>
+        <li><a href="login.php">登出</a></li>
+    </ul>   
+</div>
+
+<div id="leftside">
+    <ul class="menuleft">
+        <li><a href="index.php">首頁</a></li>
+        <li>
+            <a href="#" onclick="toggleMenu(event)">網站管理系統</a>
+            <ul class="menuleft_hide">
+                <li><a href="#">網站管理</a></li>
+            </ul>
+        </li>
+        <li>
+            <a href="#" onclick="toggleMenu(event)">商品管理系統</a>
+            <ul class="menuleft_hide">
+                <li><a href="#">商品類別</a></li>
+                <li><a href="Add_Product.php">新增商品</a></li>
+                <li><a href="Product.php">商品管理</a></li>
+            </ul>
+        </li>
+        <li>
+            <a href="#" onclick="toggleMenu(event)">會員管理系統</a>
+            <ul class="menuleft_hide">
+                <li><a href="Member.php">會員管理</a></li>
+                <li><a href="Add_Member.php">新增會員</a></li>
+            </ul>
+        </li>
+        <li>
+            <a href="#" onclick="toggleMenu(event)">權限管理系統</a>
+            <ul class="menuleft_hide">
+                <li><a href="Permissions.php">權限管理</a></li>
+                <li><a href="Add_permissions.php">新增權限</a></li>
+            </ul>
+        </li>
+        <li>
+            <a href="#" onclick="toggleMenu(event)">賣家管理系統</a>
+            <ul class="menuleft_hide">
+                <li><a href="Seller.php">賣家管理</a></li>
+                <li><a href="Add_Seller.php">新增賣家</a></li>
+            </ul>
+        </li>
+        <li>
+            <a href="#" onclick="toggleMenu(event)">訂單管理系統</a>
+            <ul class="menuleft_hide">
+                <li><a href="Order.php">訂單資料管理</a></li>
+                <li><a href="Time_Order.php">歷史訂單管理</a></li>
+            </ul>
+        </li>   
+    </ul>
+</div>
+
+<main>
+    <div class="order-container">
+        <div class="order-header">訂購人資訊</div>
+        <table>
+            <tr>
+                <td class="label">訂單編號</td>
+                <td class="content">qwe000</td>
+            </tr>
+            <tr>
+                <td class="label">訂購日期</td>
+                <td class="content">2025-02-04 15:34:42</td>
+            </tr>
+            <tr>
+                <td class="label">會員帳號</td>
+                <td class="content">qwe@gmail.com</td>
+            </tr>
+            <tr>
+                <td class="label">訂購人姓名</td>
+                <td class="content">AMY</td>
+            </tr>
+            <tr>
+                <td class="label">聯絡電話</td>
+                <td class="content">0912345678</td>
+            </tr>
+            <tr>
+                <td class="label">e-mail</td>
+                <td class="content">qwe0@gmail.com.tw</td>
+            </tr>
+            <tr>
+                <td class="label">付款方式</td>
+                <td class="content">尚未付款</td>
+            </tr>
+            <tr>
+                <td class="label">買家回覆</td>
+                <td class="content">無回覆</td>
+            </tr>
+        </table></div></div>
+        <br><br>
+        
+        <div class="order-container">
+        <div class="order-header">收件人資訊</div>
+        <table>
+            <tr>
+                <td class="label">收件人姓名</td>
+                <td class="content">qwe000</td>
+            </tr>
+            <tr>
+                <td class="label">聯絡電話</td>
+                <td class="content">2025-02-04 15:34:42</td>
+            </tr>
+            <tr>
+                <td class="label">收件地址</td>
+                <td class="content">無</td>
+            </tr>
+            <tr>
+                <td class="label">取貨方式</td>
+                <td class="content">無</td>
+            </tr>
+            <tr>
+                <td class="label">送貨時間</td>
+                <td class="content">無</td>
+            </tr>
+            <tr>
+                <td class="label">備註</td>
+                <td class="content">無</td>
+            </tr>
+        </table>
+    </div>
+</div>
+<br><br>
+<div class="order-container">
+    <div class="order-header">訂單明細</div>
+    <table>
+        <tr>
+            <th class="label1">商品序號</th>
+            <th class="label1">商品名稱</th>
+            <th class="label1">商品種類</th>
+            <th class="label1">金額</th>
+            <th class="label1">數量</th>
+            <th class="label1">小計</th>
+        </tr>
+        <tr>
+            <td class="content">無</td>
+            <td class="content">無</td>
+            <td class="content">無</td>
+            <td class="content">無</td>
+            <td class="content">無</td>
+            <td class="content">無</td>
+        </tr>
+        <tr>
+            <td class="label1" >金額小計</td>
+            <td class="content1" colspan="5">無</td>
+        </tr>
+        <tr>
+            <td class="label1" >運費</td>
+            <td class="content1" colspan="5">無</td>
+        </tr>
+        <tr>
+            <td class="label1">總金額</td>
+            <td class="content1" colspan="5">無</td>
+        </tr>
+    </table>
+    
+</div>
+</div><br><br>
+
+<div class="order-container">
+    <div class="order-header">訂單管理</div>
+    <table>
+            <tr>
+                <th class="label1">處理狀態</th>
+                <th class="label1">收款狀態</th>
+                <th class="label1">商品種類</th>
+                <th class="label1">發貨日期</th>
+                <th class="label1">收貨方式</th>
+                <th class="label1">宅配號碼</th>
+            </tr>
+            <tr>
+                <td class="content">無</td>
+                <td class="content">無</td>
+                <td class="content">無</td>
+                <td class="content">無</td>
+                <td class="content">無</td>
+                <td class="content">無</td>
+            </tr>
+    </table>
+    <br>
+    <button type="submit">更新</button>
+</div>
+</div>
+<br><br>
+<input type="button" value="取消" onclick="location.href='Order.php'">
+</main>
+
+<script src="JS/leftside.js"></script>
+
+</body>
+</html>

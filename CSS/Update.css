@@ -1,0 +1,84 @@
+body {
+    background-color: #f0f2f5;
+    font-family: Arial;
+}
+
+form {
+    position: relative;
+    background-color: #ffffff;
+    width: 800px;
+    height: auto;
+    margin: 50px auto;
+    border: 5px solid #a0a0a0;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+h1 {
+    font-family: '標楷體';
+    text-align: center;
+    color: #ffffff;
+    background: #007bff;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+label {
+    position: absolute;
+    font-family: '標楷體';
+    color: #444;
+    font-size: 16px;
+    width: 100px;
+}
+
+input[type="text"] {
+    position: absolute;
+    width: 200px;
+    padding: 5px;
+    border: 1px solid #aaa;
+    border-radius: 5px;
+    font-size: 14px;
+    background-color: #f9f9f9;
+}
+
+.labels1 { top: 140px; left: 5%; }
+.input1 { top: 140px; left: 15%; }
+.labels2 { top: 140px; left: 50%; }
+.input2 { top: 140px; left: 60%; }
+.labels3 { top: 180px; left: 5%; }
+.input3 { top: 180px; left: 15%; }
+.labels4 { top: 180px; left: 50%; }
+.input4 { top: 180px; left: 60%; }
+.labels5 { top: 220px; left: 5%; }
+.input5 { top: 220px; left: 15%; }
+.labels6 { top: 220px; left: 50%; }
+.input6 { top: 220px; left: 60%; }
+.labels7 { top: 260px; left: 5%; }
+.input7 { top: 260px; left: 15%; }
+
+textarea {
+    width: 90%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #aaa;
+    border-radius: 5px;
+    font-size: 14px;
+    background-color: #f9f9f9;
+}
+
+
+input[type="button"],button {
+    padding: 10px 20px;
+    font-size: 14px;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 0px 30px;
+}
+
+input[type="button"]:hover,button:hover {
+    background-color: #0056b3;
+}
+

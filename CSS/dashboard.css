@@ -1,0 +1,49 @@
+ main {
+      margin-top: 60px; /* 避開頂部固定欄 */
+      padding-left: 220px; /* 避開側邊欄 */
+      padding-right: 20px;
+      padding-bottom: 20px;
+      transition: padding-left 0.5s ease;
+    }
+
+    main.full-width {
+      padding-left: 20px; /* 側邊欄收起後讓 main 滿版 */
+    }
+
+    .dashboard-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .dashboard-card {
+      flex: 1 1 200px;
+      background: #f9f9f9;
+      border-left: 6px solid #2196F3;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 20px;
+      transition: transform 0.2s;
+    }
+
+    .dashboard-card:hover {
+      transform: scale(1.03);
+    }
+
+    .dashboard-card h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+      color: #333;
+    }
+
+    .dashboard-card p {
+      font-size: 24px;
+      font-weight: bold;
+      color: #2196F3;
+    }
+
+    @media screen and (max-width: 768px) {
+      main {
+        padding-left: 20px;
+      }
+    }

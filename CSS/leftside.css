@@ -1,0 +1,103 @@
+#leftside {
+    width: 200px;
+    background-color: #e6f0ff;
+    position: fixed;
+    top: 50px;
+    left: 0;
+    height: calc(100% - 50px);
+    z-index: 500;
+    transform: translateX(0);
+    transition: transform 0.5s ease;
+}
+
+#leftside.hidden {
+    transform: translateX(-100%);
+}
+ul.menuleft {
+    font-family: '標楷體';
+    list-style: none;
+    padding: 10px;
+}
+
+ul.menuleft > li {
+    margin-bottom: 5px;
+    position: relative;
+}
+
+ul.menuleft > li > a {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    background-color: #ffffff; /* 白色選單背景 */
+    color: #004080; /* 深藍文字 */
+}
+
+ul.menuleft > li > a:hover {
+    background-color: #3399ff; /* 藍色hover */
+    color: #ffffff; /* 白色文字 */
+}
+
+ul.menuleft_hide {
+    display: none;
+    list-style: none;
+    padding-left: 20px;
+}
+
+ul.menuleft_hide > li > a {
+    padding-left: 0;
+    text-decoration: none;
+    color: #004080;
+}
+
+ul.menuleft_hide > li > a:hover {
+    background-color: #80b3ff; 
+    color: #ffffff;
+}
+
+ul.menuleft > li > a:after {
+    content: " ▼";
+    font-size: 12px;
+    position: absolute;
+    right: 10px;
+    color: #004080; /* 深藍色箭頭 */
+}
+
+/* 漢堡按鈕保留背景圖片 */
+.img-button {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    width: 40px;
+    height: 40px;
+    background-image: url('sd.png');
+    background-size: cover;
+    background-position: center;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.img-button:hover {
+    transform: scale(0.9);
+    box-shadow: 0px 4px 8px rgba(0, 64, 128, 0.5); /* 深藍陰影 */
+}
+
+.img-button:active {
+    transform: scale(1.1);
+    box-shadow: 0px 2px 4px rgba(0, 64, 128, 0.3);
+}
+
+/* 響應式：手機版側邊欄預設隱藏 */
+@media (max-width: 768px) {
+    #leftside {
+        transform: translateX(-100%);
+    }
+    #leftside.show {
+        transform: translateX(0);
+    }
+}
+
+/* main 寬度變化 */
+main.full-width {
+    margin-left: 0; /* 例如隱藏側邊欄時 main 全寬 */
+}
