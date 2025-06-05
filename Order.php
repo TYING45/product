@@ -67,73 +67,60 @@ $result = $stmt->get_result();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>管理員系統</title>
+    <title>賣家訂單管理</title>
     <link rel="stylesheet" href="CSS/leftside.css">
-	<link rel="stylesheet" href="CSS/topmenu.css">
+    <link rel="stylesheet" href="CSS/topmenu.css">
     <link href="CSS/form.css" rel="stylesheet" type="text/css">
 </head>
 <body>
 <div id="top-menu">
     <ul class="topmenu">
-       <li> <button onclick="toggleSidebar()" class="img-button"></button></li>
-       <li></li>
+        <li><button onclick="toggleSidebar()" class="img-button"></button></li>
         <li><a href="#">網頁前端</a></li>
         <li><a href="logout.php">登出</a></li>
-    </ul>   
+    </ul>
 </div>
 
-	<div id="leftside">
-        <ul class="menuleft">
-            <li>
-                <a href="index.php">首頁</a>
-            </li>
-            <li>
-                <a href="#" onclick="toggleMenu(event)">網站管理系統</a>
-                <ul class="menuleft_hide">
-                    <li><a href="#">網站管理</a></li>
-                </ul>
-            </li>
-            <li>
-                <a href="#" onclick="toggleMenu(event)">商品管理系統</a>
-                <ul class="menuleft_hide">
-                    <li><a href="Add_Product.php">新增商品</a></li>
-                    <li><a href="Product.php">商品管理</a></li>
-                </ul>
-            </li>
-
-            <li>
-                <a href="#" onclick="toggleMenu(event)">會員管理系統</a>
-                <ul class="menuleft_hide">
-                    <li><a href="Member.php">會員管理</a></li>
-                    <li><a href="Add_Member.php">新增會員</a></li>
-                </ul>
-            </li>
-            <li>
-                <a href="#" onclick="toggleMenu(event)">權限管理系統</a>
-                <ul class="menuleft_hide">
-                    <li><a href="Permissions.php">權限管理</a></li>
-                    <li><a href="Add_permissions.php">新增權限</a></li>
-                </ul>
-            </li>
-            <li>
-                <a href="#" onclick="toggleMenu(event)">賣家管理系統</a>
-                <ul class="menuleft_hide">
-                    <li><a href="Seller.php">賣家管理</a></li>
-                    <li><a href="Add_Seller.php">新增賣家</a></li>
-                </ul>
-            </li>
-            <li><a href="#" onclick="toggleMenu(event)">訂單管理系統</a>
+<div id="leftside">
+    <ul class="menuleft">
+        <li><a href="index.php">首頁</a></li>
+        <li><a href="#" onclick="toggleMenu(event)">網站管理系統</a>
+            <ul class="menuleft_hide"><li><a href="#">網站管理</a></li></ul>
+        </li>
+        <li><a href="#" onclick="toggleMenu(event)">商品管理系統</a>
             <ul class="menuleft_hide">
-                    <li><a href="Order.php">訂單資料管理</a></li>
-                </ul>
-            </li>   
-        </ul>
-    </div>
+                <li><a href="Add_Product.php">新增商品</a></li>
+                <li><a href="Product.php">商品管理</a></li>
+            </ul>
+        </li>
+        <li><a href="#" onclick="toggleMenu(event)">會員管理系統</a>
+            <ul class="menuleft_hide">
+                <li><a href="Member.php">會員管理</a></li>
+                <li><a href="Add_Member.php">新增會員</a></li>
+            </ul>
+        </li>
+        <li><a href="#" onclick="toggleMenu(event)">權限管理系統</a>
+            <ul class="menuleft_hide">
+                <li><a href="Permissions.php">權限管理</a></li>
+                <li><a href="Add_permissions.php">新增權限</a></li>
+            </ul>
+        </li>
+        <li><a href="#" onclick="toggleMenu(event)">賣家管理系統</a>
+            <ul class="menuleft_hide">
+                <li><a href="Seller.php">賣家管理</a></li>
+                <li><a href="Add_Seller.php">新增賣家</a></li>
+            </ul>
+        </li>
+        <li><a href="#" onclick="toggleMenu(event)">訂單管理系統</a>
+            <ul class="menuleft_hide">
+                <li><a href="Order.php">訂單資料管理</a></li>
+            </ul>
+        </li>
+    </ul>
+</div>
 
-<!-- id  權限管理 -->
-   <main class="main">
+<main class="main">
     <h2>賣家訂單管理</h2>
-
     <form method="GET" action="Seller_Order.php">
         <input name="search" type="text" placeholder="訂單編號或會員姓名" size="20"
                value="<?= htmlspecialchars($search_keyword) ?>">
@@ -147,7 +134,6 @@ $result = $stmt->get_result();
             }
             ?>
         </select>
-
         <select name="month">
             <option value="">全部月</option>
             <?php
@@ -158,7 +144,6 @@ $result = $stmt->get_result();
             }
             ?>
         </select>
-
         <input type="submit" value="查詢">
     </form>
 
@@ -175,7 +160,7 @@ $result = $stmt->get_result();
         </thead>
         <tbody>
         <?php if ($result->num_rows === 0): ?>
-            <tr><td colspan="7" style="text-align:center;">沒有資料</td></tr>
+            <tr><td colspan="6" style="text-align:center;">沒有資料</td></tr>
         <?php else: ?>
             <?php while ($order = $result->fetch_assoc()): ?>
                 <tr>
@@ -198,12 +183,12 @@ $result = $stmt->get_result();
                     <strong><?= $p ?></strong>
                 <?php else: ?>
                     <a href="?page=<?= $p ?>&search=<?= urlencode($search_keyword) ?>&year=<?= urlencode($year) ?>&month=<?= urlencode($month) ?>"><?= $p ?></a>
-                <?php endif; ?>
-                &nbsp;
+                <?php endif; ?>&nbsp;
             <?php endfor; ?>
         <?php endif; ?>
     </div>
 </main>
+
 <script src="JS/leftside.js"></script>
 </body>
 </html>
