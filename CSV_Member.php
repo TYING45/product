@@ -10,14 +10,13 @@ if ($query->num_rows > 0) {
     echo "\xEF\xBB\xBF";
     $fp = fopen('php://output', 'w');//防止亂碼
 
-    $fields = ['Member_ID', 'Member_name', 'username', 'password', 'Email', 'Phone', 'Address'];
+    $fields = ['Member_ID', 'Member_name','password', 'Email', 'Phone', 'Address'];
     $fields = array_map(fn($field) => mb_convert_encoding($field, "UTF-8", "auto"), $fields);
     fputcsv($fp, $fields, $delimiter);
     while ($row = $query->fetch_assoc()) {
         $lineData = [
             $row['Member_ID'],
             $row['Member_name'],
-            $row['username'],
             $row['password'],
             $row['Email'],
             $row['Phone'],
