@@ -8,7 +8,6 @@ if (!isset($_SESSION['username'])) {
 include("sql_php.php");
 
 $isAdmin = isset($_SESSION['Admin_ID']);
-
 $pageRow_records = 10;
 $num_pages = isset($_GET['page']) ? intval($_GET['page']) : 1;
 $startRow_records = ($num_pages - 1) * $pageRow_records;
