@@ -1,24 +1,30 @@
 <?php
+ob_start(); // 開始輸出緩衝
 include("sql_php.php");
 $upload_dir = "uploads/";
+
 if (isset($_POST["action"]) && $_POST["action"] == "update") {
     if (!empty($_POST["Product_ID"]) && !empty($_POST["Product_name"]) && !empty($_POST["price"]) &&
-        !empty($_POST["quantity"]) && !empty($_POST["Product_introduction"] && !empty($_POST["Type"]))) {
+        !empty($_POST["quantity"]) && !empty($_POST["Product_introduction"]) && !empty($_POST["Type"])) {
         
-        $image_name = ""; // 預設圖片名稱
+        $image_name = "";
+
         if (!empty($_FILES["Image"]["name"])) {
             $allowed_types = ["jpg", "jpeg", "png", "gif"];
             $file_ext = strtolower(pathinfo($_FILES["Image"]["name"], PATHINFO_EXTENSION));
 
             if (in_array($file_ext, $allowed_types)) {
                 $image_name = uniqid() . "." . $file_ext;
-                move_uploaded_file($_FILES["Image"]["tmp_name"], $upload_dir . $image_name);
+                $target_path = $upload_dir . $image_name;
+                
+                // 嘗試移動檔案，失敗則中止
+                if (!move_uploaded_file($_FILES["Image"]["tmp_name"], $target_path)) {
+                    die("❌ 錯誤：無法移動上傳圖片，請確認 uploads/ 資料夾的權限。");
+                }
             } else {
-                echo "錯誤：圖片格式必須為 JPG、JPEG、PNG 或 GIF";
-                exit();
+                die("❌ 錯誤：圖片格式必須為 JPG、JPEG、PNG 或 GIF");
             }
         } else {
-            // 若未上傳新圖片，則保留原本圖片
             $query = "SELECT Image FROM product WHERE Product_ID=?";
             $stmt = $link->prepare($query);
             $stmt->bind_param("s", $_POST["Product_ID"]);
@@ -29,19 +35,19 @@ if (isset($_POST["action"]) && $_POST["action"] == "update") {
             $image_name = $old_image;
         }
 
-        $sql_query = "UPDATE `product` SET Product_name=?,Type=?, price=?, quantity=?, Product_introduction=?, Image=?, Remark=?  WHERE Product_ID=?";
-        
+        $sql_query = "UPDATE `product` SET Product_name=?, Type=?, price=?, quantity=?, Product_introduction=?, Image=?, Remark=? WHERE Product_ID=?";
         $stmt = $link->prepare($sql_query);
         if ($stmt) {
             $stmt->bind_param("ssiissss", 
-            $_POST["Product_name"], 
-            $_POST["Type"], 
-            $_POST["price"], 
-            $_POST["quantity"],
-            $_POST["Product_introduction"], 
-            $image_name, 
-            $_POST["Remark"], 
-            $_POST["Product_ID"]);
+                $_POST["Product_name"], 
+                $_POST["Type"], 
+                $_POST["price"], 
+                $_POST["quantity"],
+                $_POST["Product_introduction"], 
+                $image_name, 
+                $_POST["Remark"], 
+                $_POST["Product_ID"]
+            );
             $stmt->execute();
             $stmt->close();
         }   
@@ -49,20 +55,22 @@ if (isset($_POST["action"]) && $_POST["action"] == "update") {
         header("Location: Seller_Product.php");
         exit();
     } else {
-        echo "錯誤：有欄位未填";
+        echo "❌ 錯誤：有欄位未填。";
     }
 }
+
 if (isset($_GET["id"])) {
     $Product_ID = $_GET["id"];
-
-    $sql_select = "SELECT Product_name,Type, price, quantity, Product_introduction, Image,Remark FROM product WHERE Product_ID = ?";
+    $sql_select = "SELECT Product_name, Type, price, quantity, Product_introduction, Image, Remark FROM product WHERE Product_ID = ?";
     $stmt = $link->prepare($sql_select);
     $stmt->bind_param("s", $Product_ID);
     $stmt->execute();
-    $stmt->bind_result($Product_name,$Type, $price, $quantity, $Product_introduction, $Image, $Remark);
-    if ($stmt->fetch()) 
-    $stmt->close();
+    $stmt->bind_result($Product_name, $Type, $price, $quantity, $Product_introduction, $Image, $Remark);
+    if ($stmt->fetch()) {
+        $stmt->close();
+    }
 }
+ob_end_flush(); // 結束輸出緩衝
 ?>
 
 <!DOCTYPE html>
