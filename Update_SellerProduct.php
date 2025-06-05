@@ -4,8 +4,8 @@ include("sql_php.php");  // 請確認這個檔案有連接好 $link 變數
 
 // GitHub 設定，請改成你自己的
 $github_owner = "TYING45";
-$github_repo = "你的Repo名稱";
-$github_branch = "main";  // 你的主要分支名稱
+$github_repo = "product";
+$github_branch = "main";
 $github_token = "你的Personal Access Token";
 
 $upload_dir = __DIR__ . "/uploads/";  // 本機 uploads 資料夾
