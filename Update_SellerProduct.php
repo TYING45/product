@@ -1,4 +1,3 @@
-
 <?php
 ob_start(); 
 include("sql_php.php");  // 請確認這個檔案有連接好 $link 變數
