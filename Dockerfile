@@ -1,8 +1,10 @@
-# 使用官方 PHP + Apache 映像
 FROM php:8.2-apache
 
-# 複製所有專案檔案到 Apache 網頁根目錄
+# 安裝 mysqli 擴展與依賴
+RUN docker-php-ext-install mysqli
+
+# 複製專案檔案到網站根目錄
 COPY . /var/www/html/
 
-# 啟用 Apache 的 rewrite 模組（如有使用 .htaccess）
+# 啟用 Apache rewrite 模組（如果有需要）
 RUN a2enmod rewrite
