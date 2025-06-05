@@ -43,7 +43,7 @@ if ($result->num_rows > 0) {
             $row['Product_introduction'],
             $row['quantity'],
             $row['Image'],
-            $row['Remark']
+            $row['Remark'],
             $row['Sell_quantity']
         ];
         fputcsv($fp, $lineData, $delimiter);
