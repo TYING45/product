@@ -2,8 +2,12 @@
 ob_start(); // 開始輸出緩衝
 include("sql_php.php");
 
-// 取得 uploads 目錄的絕對路徑
-$upload_dir = __DIR__ . "/uploads/";
+$upload_dir = __DIR__ . "/uploads/";  // 取得絕對路徑
+$target_path = $upload_dir . $image_name;
+
+if (!move_uploaded_file($_FILES["Image"]["tmp_name"], $target_path)) {
+    die("❌ 錯誤：無法移動上傳圖片，請確認 uploads/ 資料夾的權限。");
+}
 
 // 如果 uploads 目錄不存在就建立（預設權限 0755）
 if (!is_dir($upload_dir)) {
