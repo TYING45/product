@@ -1,15 +1,10 @@
 <?php
-ob_start(); // 開始輸出緩衝
+ob_start(); 
 include("sql_php.php");
 
-$upload_dir = __DIR__ . "/uploads/";  // 取得絕對路徑
-$target_path = $upload_dir . $image_name;
+$upload_dir = __DIR__ . "/uploads/";  // 取得 uploads 資料夾絕對路徑
 
-if (!move_uploaded_file($_FILES["Image"]["tmp_name"], $target_path)) {
-    die("❌ 錯誤：無法移動上傳圖片，請確認 uploads/ 資料夾的權限。");
-}
-
-// 如果 uploads 目錄不存在就建立（預設權限 0755）
+// 如果 uploads 資料夾不存在就建立
 if (!is_dir($upload_dir)) {
     if (!mkdir($upload_dir, 0755, true)) {
         die("❌ 錯誤：無法建立 uploads 目錄，請確認權限或環境設定。");
@@ -22,7 +17,7 @@ if (isset($_POST["action"]) && $_POST["action"] == "update") {
         
         $image_name = "";
 
-        if (!empty($_FILES["Image"]["name"])) {
+        if (isset($_FILES["Image"]) && !empty($_FILES["Image"]["name"])) {
             $allowed_types = ["jpg", "jpeg", "png", "gif"];
             $file_ext = strtolower(pathinfo($_FILES["Image"]["name"], PATHINFO_EXTENSION));
 
@@ -37,6 +32,7 @@ if (isset($_POST["action"]) && $_POST["action"] == "update") {
                 die("❌ 錯誤：圖片格式必須為 JPG、JPEG、PNG 或 GIF");
             }
         } else {
+            // 沒有新圖，讀取舊圖片名稱
             $query = "SELECT Image FROM product WHERE Product_ID=?";
             $stmt = $link->prepare($query);
             $stmt->bind_param("s", $_POST["Product_ID"]);
@@ -47,6 +43,7 @@ if (isset($_POST["action"]) && $_POST["action"] == "update") {
             $image_name = $old_image;
         }
 
+        // 更新資料庫
         $sql_query = "UPDATE `product` SET Product_name=?, Type=?, price=?, quantity=?, Product_introduction=?, Image=?, Remark=? WHERE Product_ID=?";
         $stmt = $link->prepare($sql_query);
         if ($stmt) {
@@ -71,6 +68,7 @@ if (isset($_POST["action"]) && $_POST["action"] == "update") {
     }
 }
 
+// 讀取舊資料
 if (isset($_GET["id"])) {
     $Product_ID = $_GET["id"];
     $sql_select = "SELECT Product_name, Type, price, quantity, Product_introduction, Image, Remark FROM product WHERE Product_ID = ?";
@@ -82,7 +80,8 @@ if (isset($_GET["id"])) {
         $stmt->close();
     }
 }
-ob_end_flush(); // 結束輸出緩衝
+
+ob_end_flush();
 ?>
 
 <!DOCTYPE html>
