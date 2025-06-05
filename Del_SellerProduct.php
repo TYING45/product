@@ -44,7 +44,7 @@ if (isset($_GET["id"])) {
             <tr><th>欄位</th><th>資料</th></tr>
             <tr><td>商品ID</td><td><input type="text" name="Product_ID" id="Product_ID" value="<?php echo htmlspecialchars($Product_ID); ?>" readonly></td></tr>
             <tr><td>商品名稱</td><td><input type="text" name="Product_name" id="Product_name" value="<?php echo htmlspecialchars($Product_name); ?>" readonly></td></tr>
-            <tr><td>價格</td><td><input type="text" name="price" id="price" value="<?php echo htmlspecialchars($價格); ?>" readonly></td></tr>
+            <tr><td>價格</td><td><input type="text" name="price" id="price" value="<?php echo htmlspecialchars($price); ?>" readonly></td></tr>
             <tr>
                 <td colspan="2" align="center">
                     <input name="action" type="hidden" value="delete">
