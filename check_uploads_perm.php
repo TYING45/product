@@ -1,3 +1,4 @@
+<?php
 $dir = __DIR__ . "\\uploads";  // Windows 用反斜線也沒問題
 
 if (!is_dir($dir)) {
@@ -11,3 +12,4 @@ if (!is_dir($dir)) {
         unlink($testfile);
     }
 }
+?>
