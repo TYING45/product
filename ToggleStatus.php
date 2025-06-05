@@ -2,26 +2,37 @@
 session_start();
 include("sql_php.php");
 
-// 檢查是否登入且為賣家
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
-    echo "未授權訪問。請先登入為賣家帳號。";
+// 權限檢查
+if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['admin', 'seller'])) {
+    echo "未授權訪問，請先登入。";
     exit();
 }
 
-$Seller_ID = $_SESSION['Admin_ID'];
-
-// 檢查是否提供商品 ID
 if (!isset($_GET['id'])) {
-    echo "未提供商品 ID";
+    echo "未指定商品ID。";
     exit();
 }
 
 $productID = $_GET['id'];
+$role = $_SESSION['role'];
 
-// 先查出目前狀態
-$query = "SELECT Shelf_status FROM product WHERE Product_ID = ? AND Seller_ID = ?";
-$stmt = $link->prepare($query);
-$stmt->bind_param("ss", $productID, $Seller_ID);
+if ($role === 'seller') {
+    if (!isset($_SESSION['Seller_ID'])) {
+        echo "未授權訪問，請先登入賣家帳號。";
+        exit();
+    }
+    $Seller_ID = $_SESSION['Seller_ID'];
+    $sql = "SELECT Shelf_status FROM product WHERE Product_ID = ? AND Seller_ID = ?";
+    $stmt = $link->prepare($sql);
+    $stmt->bind_param("ss", $productID, $Seller_ID);
+} elseif ($role === 'admin') {
+    // 管理員不限制 Seller_ID
+    $sql = "SELECT Shelf_status FROM product WHERE Product_ID = ?";
+    $stmt = $link->prepare($sql);
+    $stmt->bind_param("s", $productID);
+}
+
+// 取得當前狀態
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -31,14 +42,26 @@ if ($result->num_rows === 0) {
 }
 
 $row = $result->fetch_assoc();
-$currentStatus = $row["Shelf_status"];
+$currentStatus = (int)$row['Shelf_status'];
+
+// 狀態切換：0->1->2->0
 $newStatus = ($currentStatus + 1) % 3;
 
-// 更新狀態
-$update = "UPDATE product SET Shelf_status = ? WHERE Product_ID = ? AND Seller_ID = ?";
-$stmt = $link->prepare($update);
-$stmt->bind_param("iss", $newStatus, $productID, $Seller_ID);
-$stmt->execute();
+// 更新狀態的 SQL
+if ($role === 'seller') {
+    $updateSql = "UPDATE product SET Shelf_status = ? WHERE Product_ID = ? AND Seller_ID = ?";
+    $updateStmt = $link->prepare($updateSql);
+    $updateStmt->bind_param("iss", $newStatus, $productID, $Seller_ID);
+} else { // admin
+    $updateSql = "UPDATE product SET Shelf_status = ? WHERE Product_ID = ?";
+    $updateStmt = $link->prepare($updateSql);
+    $updateStmt->bind_param("is", $newStatus, $productID);
+}
 
-header("Location: Seller_Product.php");
-exit();
+if ($updateStmt->execute()) {
+    header("Location: " . ($_SERVER['HTTP_REFERER'] ?? 'Seller_Product.php'));
+    exit();
+} else {
+    echo "狀態更新失敗。";
+}
+?>
