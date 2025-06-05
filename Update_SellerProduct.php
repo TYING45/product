@@ -1,7 +1,16 @@
 <?php
 ob_start(); // 開始輸出緩衝
 include("sql_php.php");
-$upload_dir = "uploads/";
+
+// 取得 uploads 目錄的絕對路徑
+$upload_dir = __DIR__ . "/uploads/";
+
+// 如果 uploads 目錄不存在就建立（預設權限 0755）
+if (!is_dir($upload_dir)) {
+    if (!mkdir($upload_dir, 0755, true)) {
+        die("❌ 錯誤：無法建立 uploads 目錄，請確認權限或環境設定。");
+    }
+}
 
 if (isset($_POST["action"]) && $_POST["action"] == "update") {
     if (!empty($_POST["Product_ID"]) && !empty($_POST["Product_name"]) && !empty($_POST["price"]) &&
@@ -16,8 +25,7 @@ if (isset($_POST["action"]) && $_POST["action"] == "update") {
             if (in_array($file_ext, $allowed_types)) {
                 $image_name = uniqid() . "." . $file_ext;
                 $target_path = $upload_dir . $image_name;
-                
-                // 嘗試移動檔案，失敗則中止
+
                 if (!move_uploaded_file($_FILES["Image"]["tmp_name"], $target_path)) {
                     die("❌ 錯誤：無法移動上傳圖片，請確認 uploads/ 資料夾的權限。");
                 }
