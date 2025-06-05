@@ -8,7 +8,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     exit();
 }
 
-$Seller_ID = $_SESSION['Seller_ID'];
+$Seller_ID = $_SESSION['Admin_ID'];
 
 // 檢查是否提供商品 ID
 if (!isset($_GET['id'])) {
