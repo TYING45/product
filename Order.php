@@ -6,27 +6,61 @@ if (!isset($_SESSION['username'])) {
 }
 include("sql_php.php");
 
-if (isset($_GET["cid"]) && ($_GET["cid"] != "")) {
-    $stmt = $link->prepare("SELECT * FROM `ordershop` WHERE `Order_ID` = ? ORDER BY Order_ID DESC");
-    $stmt->bind_param("i", $_GET["cid"]);
-} elseif (isset($_GET["keyword"]) && ($_GET["keyword"] != "")) {
-    $stmt = $link->prepare("SELECT * FROM `ordershop` WHERE `Order_name` LIKE ? OR `Order_ID` LIKE ? ORDER BY Order_ID DESC");
-    $keyword = "%" . $_GET["keyword"] . "%";
-    $stmt->bind_param("ss", $keyword, $keyword);
-} else {
-    $stmt = $link->prepare("SELECT * FROM `ordershop` ORDER BY Order_ID DESC");
+$search_keyword = $_GET['search'] ?? '';
+$year = $_GET['year'] ?? '';
+$month = $_GET['month'] ?? '';
+$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+$per_page = 10;
+$offset = ($page - 1) * $per_page;
+
+// 構建查詢條件
+$sql = "FROM `ordershop` WHERE 1=1";
+$params = [];
+$types = "";
+
+if ($search_keyword !== '') {
+    $sql .= " AND (`Order_name` LIKE ? OR `Order_ID` LIKE ?)";
+    $search = '%' . $search_keyword . '%';
+    $params[] = $search;
+    $params[] = $search;
+    $types .= "ss";
 }
 
+if ($year !== '') {
+    $sql .= " AND YEAR(`Order_Date`) = ?";
+    $params[] = $year;
+    $types .= "i";
+}
+
+if ($month !== '') {
+    $sql .= " AND MONTH(`Order_Date`) = ?";
+    $params[] = $month;
+    $types .= "i";
+}
+
+// 計算總筆數
+$count_sql = "SELECT COUNT(*) $sql";
+$stmt = $link->prepare($count_sql);
+if (!empty($params)) {
+    $stmt->bind_param($types, ...$params);
+}
+$stmt->execute();
+$stmt->bind_result($total_rows);
+$stmt->fetch();
+$stmt->close();
+
+$total_pages = ceil($total_rows / $per_page);
+
+// 查詢訂單資料
+$data_sql = "SELECT * $sql ORDER BY Order_ID DESC LIMIT ? OFFSET ?";
+$params[] = $per_page;
+$params[] = $offset;
+$types .= "ii";
+
+$stmt = $link->prepare($data_sql);
+$stmt->bind_param($types, ...$params);
 $stmt->execute();
 $result = $stmt->get_result();
-$rows = $result->num_rows;
-
-function keepURL() {
-    $keepURL = "";
-    if (isset($_GET["keyword"])) $keepURL .= "&keyword=" . urlencode($_GET["keyword"]);
-    if (isset($_GET["cid"])) $keepURL .= "&cid=" . $_GET["cid"];
-    return $keepURL;
-}
 ?>
 <!DOCTYPE html>
 <html lang="zh-TW">
