@@ -92,6 +92,7 @@ while ($row = $seller_result->fetch_assoc()) {
 <div id="top-menu">
     <ul class="topmenu">
         <li><button onclick="toggleSidebar()" class="img-button"></button></li>
+        <li></li><li></li>
         <li><a href="#">管理介面</a></li>
         <li><a href="logout.php">登出</a></li>
     </ul>   
