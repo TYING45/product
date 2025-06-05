@@ -161,7 +161,7 @@ function keepURL() {
         <tbody>
         <?php while ($row = $result->fetch_assoc()): ?>
             <tr>
-                <td><img src="<?= htmlspecialchars($row['Image'] ?: 'default.png') ?>" alt="Image" width="100"></td>
+                <td><img src="uploads/<?php echo htmlspecialchars($row["Image"] ?: "default.png"); ?>" width="100"></td>
                 <td><?= htmlspecialchars($row['Product_ID']) ?></td>
                 <td><?= htmlspecialchars($row['Product_name']) ?></td>
                 <td><?= htmlspecialchars($row['Type']) ?></td>
