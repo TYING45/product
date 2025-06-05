@@ -6,7 +6,7 @@ include("sql_php.php");  // 請確認這個檔案有連接好 $link 變數
 $github_owner = "TYING45";
 $github_repo = "product";
 $github_branch = "main";
-$github_token = "你的Personal Access Token";
+$github_token = "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";
 
 $upload_dir = __DIR__ . "/uploads/";  // 本機 uploads 資料夾
 
