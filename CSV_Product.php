@@ -10,7 +10,7 @@ if ($query->num_rows > 0) {
     echo "\xEF\xBB\xBF";
     $fp = fopen('php://output', 'w');//防止亂碼
 
-    $fields = ['Product_ID','Seller_ID', 'Product_name','Type', 'price' ,'Product_introduction', 'quantity', 'Image', 'Remark'];
+    $fields = ['Product_ID','Seller_ID', 'Product_name','Type', 'price' ,'Product_introduction', 'quantity', 'Image', 'Remark','Sell_quantity'];
     fputcsv($fp, $fields, $delimiter);
     while ($row = $query->fetch_assoc()) {
         $lineData = [
@@ -22,7 +22,8 @@ if ($query->num_rows > 0) {
             $row['Product_introduction'],
             $row['quantity'],
             $row['Image'].
-            $row['Remark']
+            $row['Remark'],
+            $row['Sell_quantity']
         ];
         fputcsv($fp, $lineData, $delimiter);
     }
