@@ -164,7 +164,6 @@ $result = $stmt->get_result();
         </select>
 
         <input type="submit" value="查詢">
-        <input type="button" onclick="location.href='Seller_Order_Export.php'" value="輸出CSV">
     </form>
 
     <table border="1" cellpadding="5" cellspacing="0" style="margin-top: 1rem; width: 100%;">
