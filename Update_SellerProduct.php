@@ -8,53 +8,16 @@ $github_repo = "product";
 $github_branch = "main";
 $github_token = "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";
 
-$upload_dir = __DIR__ . "/uploads/";  // 本機 uploads 資料夾
-
-// 如果 uploads 資料夾不存在就建立
-if (!is_dir($upload_dir)) {
-    if (!mkdir($upload_dir, 0755, true)) {
-        die("❌ 錯誤：無法建立 uploads 目錄，請確認權限或環境設定。");
-    }
-}
-
-// 取得 GitHub 檔案 SHA（如果檔案存在）
-function getGitHubFileSha($owner, $repo, $branch, $token, $remote_path) {
-    $url = "https://api.github.com/repos/$owner/$repo/contents/$remote_path?ref=$branch";
-
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        "Authorization: token $token",
-        "User-Agent: PHP-script",
-        "Content-Type: application/json"
-    ]);
-    $response = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    if ($httpCode == 200) {
-        $json = json_decode($response, true);
-        return $json['sha'] ?? null;
-    }
-    return null;
-}
-
-// 將圖片上傳或更新到 GitHub
-function uploadOrUpdateImageToGitHub($owner, $repo, $branch, $token, $local_path, $remote_path) {
-    $content = base64_encode(file_get_contents($local_path));
+// 上傳圖片到 GitHub 的函式（不存本機）
+function uploadImageToGitHub($owner, $repo, $branch, $token, $image_tmp_path, $remote_path) {
+    $content = base64_encode(file_get_contents($image_tmp_path));
     $url = "https://api.github.com/repos/$owner/$repo/contents/$remote_path";
 
-    $sha = getGitHubFileSha($owner, $repo, $branch, $token, $remote_path);
-
     $data = [
-        "message" => ($sha ? "Update image $remote_path via PHP script" : "Add image $remote_path via PHP script"),
+        "message" => "Add image $remote_path via PHP script",
         "branch" => $branch,
         "content" => $content
     ];
-
-    if ($sha) {
-        $data['sha'] = $sha;
-    }
 
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
@@ -75,7 +38,7 @@ function uploadOrUpdateImageToGitHub($owner, $repo, $branch, $token, $local_path
 
 if (isset($_POST["action"]) && $_POST["action"] == "update") {
     if (!empty($_POST["Product_ID"]) && !empty($_POST["Product_name"]) && !empty($_POST["price"]) &&
-        isset($_POST["quantity"]) && !empty($_POST["Product_introduction"]) && !empty($_POST["Type"])) {
+        !empty($_POST["quantity"]) && !empty($_POST["Product_introduction"]) && !empty($_POST["Type"])) {
         
         $image_name = "";
 
@@ -85,26 +48,23 @@ if (isset($_POST["action"]) && $_POST["action"] == "update") {
 
             if (in_array($file_ext, $allowed_types)) {
                 $image_name = uniqid() . "." . $file_ext;
-                $target_path = $upload_dir . $image_name;
+                $remote_path = "uploads/" . $image_name;
 
-                if (!move_uploaded_file($_FILES["Image"]["tmp_name"], $target_path)) {
-                    die("❌ 錯誤：無法移動上傳圖片，請確認 uploads/ 資料夾的權限。");
-                }
-
-                // 上傳或更新圖片到 GitHub
-                list($code, $res) = uploadOrUpdateImageToGitHub(
+                // 直接從 tmp_name 上傳到 GitHub
+                list($code, $res) = uploadImageToGitHub(
                     $github_owner,
                     $github_repo,
                     $github_branch,
                     $github_token,
-                    $target_path,
-                    "uploads/" . $image_name
+                    $_FILES["Image"]["tmp_name"],
+                    $remote_path
                 );
 
-                if ($code != 201 && $code != 200) {
+                if ($code == 201 || $code == 200) {
+                    // 上傳成功
+                } else {
                     die("❌ GitHub 上傳圖片失敗，HTTP 狀態碼：$code，回應：$res");
                 }
-
             } else {
                 die("❌ 錯誤：圖片格式必須為 JPG、JPEG、PNG 或 GIF");
             }
@@ -164,33 +124,34 @@ ob_end_flush();
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>更新商品資料</title>
-    <link rel="stylesheet" href="CSS/Product_update.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>更新商品資料</title>
+<link rel="stylesheet" href="CSS/Product_update.css" />
 </head>
 <body>
 <form method="post" enctype="multipart/form-data">
     <h1><b>更新商品資料</b></h1>
 
     <label class='labels1'>商品編號:</label>
-    <input type="hidden" name="action" value="update">
-    <input class="input1" type="text" name="Product_ID" value="<?php echo htmlspecialchars($Product_ID); ?>" readonly><br>
-      
+    <input type="hidden" name="action" value="update" />
+    <input class="input1" type="text" name="Product_ID" value="<?php echo htmlspecialchars($Product_ID); ?>" readonly /><br />
+
     <?php if (!empty($Image)): ?>
-        <!-- 用 GitHub Raw 連結顯示圖片 -->
-        <img src="https://raw.githubusercontent.com/<?php echo htmlspecialchars($github_owner) ?>/<?php echo htmlspecialchars($github_repo) ?>/<?php echo htmlspecialchars($github_branch) ?>/uploads/<?php echo htmlspecialchars($Image); ?>" alt="Image" style="max-width:200px;">
+        <!-- GitHub圖片URL示範，改成你的GitHub Raw網址 -->
+        <img src="https://raw.githubusercontent.com/<?php echo $github_owner; ?>/<?php echo $github_repo; ?>/<?php echo $github_branch; ?>/uploads/<?php echo htmlspecialchars($Image); ?>" alt="Image" style="max-width:200px;" />
     <?php endif; ?>
-    <input type="file" name="Image"><br> 
+
+    <input type="file" name="Image" /><br />
 
     <label class="labels2">商品名稱:</label>
-    <input class="input2" type="text" name="Product_name" value="<?php echo htmlspecialchars($Product_name); ?>"><br>
+    <input class="input2" type="text" name="Product_name" value="<?php echo htmlspecialchars($Product_name); ?>" /><br />
 
     <label class="labels3">商品價格:</label>
-    <input class="input3" type="text" name="price" value="<?php echo htmlspecialchars($price); ?>"><br>
+    <input class="input3" type="text" name="price" value="<?php echo htmlspecialchars($price); ?>" /><br />
 
-    <label class="labels4">庫存數量：</label> 
-    <input class="input4" type="text" name="quantity" value="<?php echo htmlspecialchars($quantity); ?>"><br>
+    <label class="labels4">庫存數量：</label>
+    <input class="input4" type="text" name="quantity" value="<?php echo htmlspecialchars($quantity); ?>" /><br />
 
     <label class="labels5">商品種類:</label>
     <select class="input5" name="Type" required>
@@ -201,16 +162,17 @@ ob_end_flush();
             echo "<option value='$t' $selected>$t</option>";
         }
         ?>
-    </select><br>
-    
-    <label>商品簡介:</label><br>
-    <textarea name="Product_introduction" rows="10" cols="100"><?php echo htmlspecialchars($Product_introduction); ?></textarea><br><br>
+    </select><br />
 
-    <label>備註：</label><br>
-    <textarea name="Remark" rows="2" cols="100"><?php echo htmlspecialchars($Remark); ?></textarea><br> 
+    <label>商品簡介:</label><br />
+    <textarea name="Product_introduction" rows="10" cols="100"><?php echo htmlspecialchars($Product_introduction); ?></textarea><br /><br />
 
-    <input type="button" value="取消" onclick="location.href='Seller_Product.php'">    
+    <label>備註：</label><br />
+    <textarea name="Remark" rows="2" cols="100"><?php echo htmlspecialchars($Remark); ?></textarea><br />
+
+    <input type="button" value="取消" onclick="location.href='Seller_Product.php'" />
     <button type="submit">更新</button>
 </form>
 </body>
 </html>
+
