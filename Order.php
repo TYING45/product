@@ -98,12 +98,52 @@ while ($row = $seller_result->fetch_assoc()) {
 </div>
 
 <div id="leftside">
-    <ul class="menuleft">
-        <li><a href="index.php">首頁</a></li>
-        <li><a href="Order.php">訂單管理</a></li>
-        <!-- 其他功能選單 -->
-    </ul>
-</div>
+        <ul class="menuleft">
+            <li>
+                <a href="index.php">首頁</a>
+            </li>
+            <li>
+                <a href="#" onclick="toggleMenu(event)">網站管理系統</a>
+                <ul class="menuleft_hide">
+                    <li><a href="#">網站管理</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#" onclick="toggleMenu(event)">商品管理系統</a>
+                <ul class="menuleft_hide">
+                    <li><a href="Add_Product.php">新增商品</a></li>
+                    <li><a href="Product.php">商品管理</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="#" onclick="toggleMenu(event)">會員管理系統</a>
+                <ul class="menuleft_hide">
+                    <li><a href="Member.php">會員管理</a></li>
+                    <li><a href="Add_Member.php">新增會員</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#" onclick="toggleMenu(event)">權限管理系統</a>
+                <ul class="menuleft_hide">
+                    <li><a href="Permissions.php">權限管理</a></li>
+                    <li><a href="Add_permissions.php">新增權限</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#" onclick="toggleMenu(event)">賣家管理系統</a>
+                <ul class="menuleft_hide">
+                    <li><a href="Seller.php">賣家管理</a></li>
+                    <li><a href="Add_Seller.php">新增賣家</a></li>
+                </ul>
+            </li>
+            <li><a href="#" onclick="toggleMenu(event)">訂單管理系統</a>
+            <ul class="menuleft_hide">
+                    <li><a href="Order.php">訂單資料管理</a></li>
+                </ul>
+            </li>   
+        </ul>
+    </div>
 
 <main class="main">
     <h2>訂單管理（管理員）</h2>
@@ -131,15 +171,6 @@ while ($row = $seller_result->fetch_assoc()) {
                 echo "<option value='$val' $selected>$m 月</option>";
             }
             ?>
-        </select>
-
-        <select name="seller_id">
-            <option value="">全部賣家</option>
-            <?php foreach ($sellers as $s): ?>
-                <option value="<?= $s['Seller_ID'] ?>" <?= ($seller_id == $s['Seller_ID']) ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($s['Seller_name']) ?>
-                </option>
-            <?php endforeach; ?>
         </select>
 
         <input type="submit" value="查詢">
