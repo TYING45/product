@@ -1,11 +1,41 @@
 <?php
-ob_start();
-include("sql_php.php"); // 請確認這個檔案有連接 $link
+ob_start(); 
+include("sql_php.php");  // 請確認這個檔案有連接好 $link 變數
 
-// GitHub Pages base URL
-$github_pages_base = "https://tying45.github.io/product/uploads/";
+// GitHub 設定，請改成你自己的
+$github_owner = "TYING45";
+$github_repo = "product";
+$github_branch = "main";
+$github_token = "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";
 
-// 更新商品
+// 上傳圖片到 GitHub 的函式（不存本機）
+function uploadImageToGitHub($owner, $repo, $branch, $token, $image_tmp_path, $remote_path) {
+    $content = base64_encode(file_get_contents($image_tmp_path));
+    $url = "https://api.github.com/repos/$owner/$repo/contents/$remote_path";
+
+    $data = [
+        "message" => "Add image $remote_path via PHP script",
+        "branch" => $branch,
+        "content" => $content
+    ];
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        "Authorization: token $token",
+        "User-Agent: PHP-script",
+        "Content-Type: application/json"
+    ]);
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    return [$httpCode, $response];
+}
+
 if (isset($_POST["action"]) && $_POST["action"] == "update") {
     if (!empty($_POST["Product_ID"]) && !empty($_POST["Product_name"]) && !empty($_POST["price"]) &&
         !empty($_POST["quantity"]) && !empty($_POST["Product_introduction"]) && !empty($_POST["Type"])) {
@@ -18,17 +48,28 @@ if (isset($_POST["action"]) && $_POST["action"] == "update") {
 
             if (in_array($file_ext, $allowed_types)) {
                 $image_name = uniqid() . "." . $file_ext;
-                $local_path = __DIR__ . "/docs/uploads/" . $image_name;
+                $remote_path = "uploads/" . $image_name;
 
-                // 儲存圖片到 docs/uploads/
-                if (!move_uploaded_file($_FILES["Image"]["tmp_name"], $local_path)) {
-                    die("❌ 錯誤：無法儲存圖片到 docs/uploads/");
+                // 直接從 tmp_name 上傳到 GitHub
+                list($code, $res) = uploadImageToGitHub(
+                    $github_owner,
+                    $github_repo,
+                    $github_branch,
+                    $github_token,
+                    $_FILES["Image"]["tmp_name"],
+                    $remote_path
+                );
+
+                if ($code == 201 || $code == 200) {
+                    // 上傳成功
+                } else {
+                    die("❌ GitHub 上傳圖片失敗，HTTP 狀態碼：$code，回應：$res");
                 }
             } else {
                 die("❌ 錯誤：圖片格式必須為 JPG、JPEG、PNG 或 GIF");
             }
         } else {
-            // 沒有新圖片 → 取原圖
+            // 沒有新圖，讀取舊圖片名稱
             $query = "SELECT Image FROM product WHERE Product_ID=?";
             $stmt = $link->prepare($query);
             $stmt->bind_param("s", $_POST["Product_ID"]);
@@ -39,23 +80,23 @@ if (isset($_POST["action"]) && $_POST["action"] == "update") {
             $image_name = $old_image;
         }
 
-        // 更新資料
+        // 更新資料庫
         $sql_query = "UPDATE product SET Product_name=?, Type=?, price=?, quantity=?, Product_introduction=?, Image=?, Remark=? WHERE Product_ID=?";
         $stmt = $link->prepare($sql_query);
         if ($stmt) {
-            $stmt->bind_param("ssiissss",
-                $_POST["Product_name"],
-                $_POST["Type"],
-                $_POST["price"],
+            $stmt->bind_param("ssiissss", 
+                $_POST["Product_name"], 
+                $_POST["Type"], 
+                $_POST["price"], 
                 $_POST["quantity"],
-                $_POST["Product_introduction"],
-                $image_name,
-                $_POST["Remark"],
+                $_POST["Product_introduction"], 
+                $image_name, 
+                $_POST["Remark"], 
                 $_POST["Product_ID"]
             );
             $stmt->execute();
             $stmt->close();
-        }
+        }   
 
         header("Location: Seller_Product.php");
         exit();
@@ -64,7 +105,7 @@ if (isset($_POST["action"]) && $_POST["action"] == "update") {
     }
 }
 
-// 讀取舊資料
+// 讀取舊資料，給表單用
 if (isset($_GET["id"])) {
     $Product_ID = $_GET["id"];
     $sql_select = "SELECT Product_name, Type, price, quantity, Product_introduction, Image, Remark FROM product WHERE Product_ID = ?";
@@ -97,7 +138,7 @@ ob_end_flush();
     <input class="input1" type="text" name="Product_ID" value="<?php echo htmlspecialchars($Product_ID); ?>" readonly /><br />
 
     <?php if (!empty($Image)): ?>
-        <img src="<?php echo $github_pages_base . htmlspecialchars($Image); ?>" alt="Image" style="max-width:200px;" />
+    <img src="https://raw.githubusercontent.com/<?php echo $github_owner; ?>/<?php echo $github_repo; ?>/<?php echo $github_branch; ?>/uploads/<?php echo htmlspecialchars($Image); ?>" alt="Image" style="max-width:200px;" />
     <?php endif; ?>
 
     <input type="file" name="Image" /><br />
