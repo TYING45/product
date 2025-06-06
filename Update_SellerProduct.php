@@ -1,18 +1,14 @@
 <?php
-ob_start();
-include("sql_php.php");  // 確保連線變數 $link 正常
+ob_start(); 
+include("sql_php.php");
 
 // GitHub 設定
 $github_owner = "TYING45";
 $github_repo = "product";
 $github_branch = "main";
-$github_token = "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"; 
+$github_token = "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n";
 
 function uploadImageToGitHub($owner, $repo, $branch, $token, $image_tmp_path, $remote_path) {
-    if (!file_exists($image_tmp_path)) {
-        return [0, "❌ 找不到暫存圖片檔"];
-    }
-
     $content = base64_encode(file_get_contents($image_tmp_path));
     $url = "https://api.github.com/repos/$owner/$repo/contents/$remote_path";
 
@@ -36,16 +32,15 @@ function uploadImageToGitHub($owner, $repo, $branch, $token, $image_tmp_path, $r
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
-    return [$httpCode ?: 0, $response ?: "無回應"];
+    return [$httpCode, $response];
 }
 
+// 資料更新處理
 if (isset($_POST["action"]) && $_POST["action"] == "update") {
     if (!empty($_POST["Product_ID"]) && !empty($_POST["Product_name"]) && !empty($_POST["price"]) &&
         !empty($_POST["quantity"]) && !empty($_POST["Product_introduction"]) && !empty($_POST["Type"])) {
         
         $image_name = "";
-        $code = null;
-        $res = null;
 
         if (isset($_FILES["Image"]) && !empty($_FILES["Image"]["name"])) {
             $allowed_types = ["jpg", "jpeg", "png", "gif"];
@@ -55,7 +50,7 @@ if (isset($_POST["action"]) && $_POST["action"] == "update") {
                 $image_name = uniqid() . "." . $file_ext;
                 $remote_path = "uploads/" . $image_name;
 
-                list($code, $res) = uploadImageToGitHub(
+                $uploadResult = uploadImageToGitHub(
                     $github_owner,
                     $github_repo,
                     $github_branch,
@@ -64,14 +59,19 @@ if (isset($_POST["action"]) && $_POST["action"] == "update") {
                     $remote_path
                 );
 
-                if ($code !== 201 && $code !== 200) {
-                    die("❌ GitHub 上傳圖片失敗，HTTP 狀態碼：$code，回應：$res");
+                $code = isset($uploadResult[0]) ? $uploadResult[0] : null;
+                $res = isset($uploadResult[1]) ? $uploadResult[1] : "無回應";
+
+                if ($code === 201 || $code === 200) {
+                    // 成功
+                } else {
+                    die("❌ GitHub 上傳圖片失敗<br>HTTP 狀態碼：$code<br>回應內容：$res");
                 }
             } else {
-                die("❌ 圖片格式錯誤，僅限 JPG, JPEG, PNG, GIF");
+                die("❌ 錯誤：圖片格式必須為 JPG、JPEG、PNG 或 GIF");
             }
         } else {
-            // 無新圖片，保留舊圖
+            // 沒有新圖，保留原圖
             $query = "SELECT Image FROM product WHERE Product_ID=?";
             $stmt = $link->prepare($query);
             $stmt->bind_param("s", $_POST["Product_ID"]);
@@ -103,11 +103,11 @@ if (isset($_POST["action"]) && $_POST["action"] == "update") {
         header("Location: Seller_Product.php");
         exit();
     } else {
-        echo "❌ 錯誤：所有欄位皆為必填。";
+        echo "❌ 錯誤：有欄位未填。";
     }
 }
 
-// 讀取舊資料
+// 載入舊資料
 if (isset($_GET["id"])) {
     $Product_ID = $_GET["id"];
     $sql_select = "SELECT Product_name, Type, price, quantity, Product_introduction, Image, Remark FROM product WHERE Product_ID = ?";
@@ -115,10 +115,10 @@ if (isset($_GET["id"])) {
     $stmt->bind_param("s", $Product_ID);
     $stmt->execute();
     $stmt->bind_result($Product_name, $Type, $price, $quantity, $Product_introduction, $Image, $Remark);
-    $stmt->fetch();
-    $stmt->close();
+    if ($stmt->fetch()) {
+        $stmt->close();
+    }
 }
-
 ob_end_flush();
 ?>
 
@@ -126,53 +126,52 @@ ob_end_flush();
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>更新商品資料</title>
 <link rel="stylesheet" href="CSS/Product_update.css" />
 </head>
 <body>
 <form method="post" enctype="multipart/form-data">
-   <h1><b>更新商品資料</b></h1>
-<input type="hidden" name="action" value="update" />
+    <h1><b>更新商品資料</b></h1>
 
-<label class="labels1">商品編號:</label>
-<input class="input1" type="text" name="Product_ID" value="<?php echo htmlspecialchars($Product_ID); ?>" readonly /><br />
+    <label class='labels1'>商品編號:</label>
+    <input type="hidden" name="action" value="update" />
+    <input class="input1" type="text" name="Product_ID" value="<?php echo htmlspecialchars($Product_ID); ?>" readonly /><br />
 
-<?php if (!empty($Image)): ?>
-    <label class="labels1">目前圖片：</label><br />
-    <img src="https://raw.githubusercontent.com/<?php echo $github_owner; ?>/<?php echo $github_repo; ?>/<?php echo $github_branch; ?>/uploads/<?php echo htmlspecialchars($Image); ?>" alt="Image" style="max-width:200px; border:1px solid #ccc; padding:5px; margin-bottom:10px;" /><br />
-<?php endif; ?>
+    <?php if (!empty($Image)): ?>
+        <img src="https://raw.githubusercontent.com/<?php echo $github_owner . '/' . $github_repo . '/' . $github_branch . '/uploads/' . htmlspecialchars($Image); ?>" alt="Image" />
+    <?php endif; ?>
 
-<label class="labels1">上傳新圖片：</label>
-<input class="input1" type="file" name="Image" /><br />
+    <input type="file" name="Image" /><br />
 
-<label class="labels2">商品名稱:</label>
-<input class="input2" type="text" name="Product_name" value="<?php echo htmlspecialchars($Product_name); ?>" required /><br />
+    <label class="labels2">商品名稱:</label>
+    <input class="input2" type="text" name="Product_name" value="<?php echo htmlspecialchars($Product_name); ?>" /><br />
 
-<label class="labels3">商品價格:</label>
-<input class="input3" type="number" name="price" value="<?php echo htmlspecialchars($price); ?>" required /><br />
+    <label class="labels3">商品價格:</label>
+    <input class="input3" type="text" name="price" value="<?php echo htmlspecialchars($price); ?>" /><br />
 
-<label class="labels4">庫存數量：</label>
-<input class="input4" type="number" name="quantity" value="<?php echo htmlspecialchars($quantity); ?>" required /><br />
+    <label class="labels4">庫存數量：</label>
+    <input class="input4" type="text" name="quantity" value="<?php echo htmlspecialchars($quantity); ?>" /><br />
 
-<label class="labels5">商品種類:</label>
-<select class="input5" name="Type" required>
-    <?php
-    $types = ["家具", "家電", "衣物", "3C", "書", "玩具", "運動用品", "其他"];
-    foreach ($types as $t) {
-        $selected = ($t == $Type) ? "selected" : "";
-        echo "<option value='$t' $selected>$t</option>";
-    }
-    ?>
-</select><br />
+    <label class="labels5">商品種類:</label>
+    <select class="input5" name="Type" required>
+        <?php
+        $types = ["家具", "家電", "衣物", "3C", "書", "玩具", "運動用品", "其他"];
+        foreach ($types as $t) {
+            $selected = ($t == $Type) ? "selected" : "";
+            echo "<option value='$t' $selected>$t</option>";
+        }
+        ?>
+    </select><br />
 
-<label class="labels6">商品簡介:</label><br />
-<textarea class="input6" name="Product_introduction" rows="10" cols="100"><?php echo htmlspecialchars($Product_introduction); ?></textarea><br /><br />
+    <label>商品簡介:</label><br />
+    <textarea name="Product_introduction" rows="10" cols="100"><?php echo htmlspecialchars($Product_introduction); ?></textarea><br /><br />
 
-<label class="labels7">備註：</label><br />
-<textarea class="input7" name="Remark" rows="2" cols="100"><?php echo htmlspecialchars($Remark); ?></textarea><br />
+    <label>備註：</label><br />
+    <textarea name="Remark" rows="2" cols="100"><?php echo htmlspecialchars($Remark); ?></textarea><br />
 
-<input type="button" value="取消" onclick="location.href='Seller_Product.php'" />
-<button type="submit">更新</button>
+    <input type="button" value="取消" onclick="location.href='Seller_Product.php'" />
+    <button type="submit">更新</button>
 </form>
 </body>
 </html>
