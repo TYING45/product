@@ -6,7 +6,7 @@ include("sql_php.php");
 $github_owner = "TYING45";
 $github_repo = "product";
 $github_branch = "main";
-$github_token = "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n";
+$github_token = "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";
 
 function uploadImageToGitHub($owner, $repo, $branch, $token, $image_tmp_path, $remote_path) {
     $content = base64_encode(file_get_contents($image_tmp_path));
