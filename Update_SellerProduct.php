@@ -131,46 +131,48 @@ ob_end_flush();
 </head>
 <body>
 <form method="post" enctype="multipart/form-data">
-    <h1><b>更新商品資料</b></h1>
+   <h1><b>更新商品資料</b></h1>
+<input type="hidden" name="action" value="update" />
 
-    <input type="hidden" name="action" value="update" />
-    <label class="labels1">商品編號:</label>
-    <input class="input1" type="text" name="Product_ID" value="<?php echo htmlspecialchars($Product_ID); ?>" readonly /><br />
+<label class="labels1">商品編號:</label>
+<input class="input1" type="text" name="Product_ID" value="<?php echo htmlspecialchars($Product_ID); ?>" readonly /><br />
 
-    <?php if (!empty($Image)): ?>
-        <img src="https://raw.githubusercontent.com/<?php echo $github_owner; ?>/<?php echo $github_repo; ?>/<?php echo $github_branch; ?>/uploads/<?php echo htmlspecialchars($Image); ?>" alt="Image" style="max-width:200px;" />
-    <?php endif; ?>
+<?php if (!empty($Image)): ?>
+    <label class="labels1">目前圖片：</label><br />
+    <img src="https://raw.githubusercontent.com/<?php echo $github_owner; ?>/<?php echo $github_repo; ?>/<?php echo $github_branch; ?>/uploads/<?php echo htmlspecialchars($Image); ?>" alt="Image" style="max-width:200px; border:1px solid #ccc; padding:5px; margin-bottom:10px;" /><br />
+<?php endif; ?>
 
-    <input type="file" name="Image" /><br />
+<label class="labels1">上傳新圖片：</label>
+<input class="input1" type="file" name="Image" /><br />
 
-    <label class="labels2">商品名稱:</label>
-    <input class="input2" type="text" name="Product_name" value="<?php echo htmlspecialchars($Product_name); ?>" required /><br />
+<label class="labels2">商品名稱:</label>
+<input class="input2" type="text" name="Product_name" value="<?php echo htmlspecialchars($Product_name); ?>" required /><br />
 
-    <label class="labels3">商品價格:</label>
-    <input class="input3" type="number" name="price" value="<?php echo htmlspecialchars($price); ?>" required /><br />
+<label class="labels3">商品價格:</label>
+<input class="input3" type="number" name="price" value="<?php echo htmlspecialchars($price); ?>" required /><br />
 
-    <label class="labels4">庫存數量：</label>
-    <input class="input4" type="number" name="quantity" value="<?php echo htmlspecialchars($quantity); ?>" required /><br />
+<label class="labels4">庫存數量：</label>
+<input class="input4" type="number" name="quantity" value="<?php echo htmlspecialchars($quantity); ?>" required /><br />
 
-    <label class="labels5">商品種類:</label>
-    <select class="input5" name="Type" required>
-        <?php
-        $types = ["家具", "家電", "衣物", "3C", "書", "玩具", "運動用品", "其他"];
-        foreach ($types as $t) {
-            $selected = ($t == $Type) ? "selected" : "";
-            echo "<option value='$t' $selected>$t</option>";
-        }
-        ?>
-    </select><br />
+<label class="labels5">商品種類:</label>
+<select class="input5" name="Type" required>
+    <?php
+    $types = ["家具", "家電", "衣物", "3C", "書", "玩具", "運動用品", "其他"];
+    foreach ($types as $t) {
+        $selected = ($t == $Type) ? "selected" : "";
+        echo "<option value='$t' $selected>$t</option>";
+    }
+    ?>
+</select><br />
 
-    <label>商品簡介:</label><br />
-    <textarea name="Product_introduction" rows="10" cols="100"><?php echo htmlspecialchars($Product_introduction); ?></textarea><br /><br />
+<label class="labels6">商品簡介:</label><br />
+<textarea class="input6" name="Product_introduction" rows="10" cols="100"><?php echo htmlspecialchars($Product_introduction); ?></textarea><br /><br />
 
-    <label>備註：</label><br />
-    <textarea name="Remark" rows="2" cols="100"><?php echo htmlspecialchars($Remark); ?></textarea><br />
+<label class="labels7">備註：</label><br />
+<textarea class="input7" name="Remark" rows="2" cols="100"><?php echo htmlspecialchars($Remark); ?></textarea><br />
 
-    <input type="button" value="取消" onclick="location.href='Seller_Product.php'" />
-    <button type="submit">更新</button>
+<input type="button" value="取消" onclick="location.href='Seller_Product.php'" />
+<button type="submit">更新</button>
 </form>
 </body>
 </html>
