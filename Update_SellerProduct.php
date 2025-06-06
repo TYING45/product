@@ -7,13 +7,19 @@ $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
 // 環境變數
-$token = $_ENV['GITHUB_TOKEN'];
-$repoOwner = $_ENV['GITHUB_REPO_OWNER'];
-$repoName = $_ENV['GITHUB_REPO_NAME'];
-$branch = $_ENV['GITHUB_BRANCH'];
-$githubPagesUrl = rtrim($_ENV['GITHUB_PAGES_URL'], '/') . '/';
+$token = $_ENV['GITHUB_TOKEN'] ?? '';
+$repoOwner = $_ENV['GITHUB_REPO_OWNER'] ?? '';
+$repoName = $_ENV['GITHUB_REPO_NAME'] ?? '';
+$branch = $_ENV['GITHUB_BRANCH'] ?? '';
+$githubPagesUrl = rtrim($_ENV['GITHUB_PAGES_URL'] ?? '', '/') . '/';
 
-// GitHub API 上傳圖片
+// 檢查 .env 設定
+if (!$token || !$repoOwner || !$repoName || !$branch || !$githubPagesUrl) {
+    echo "錯誤：.env 設定不完整，請檢查 GITHUB_* 變數。";
+    exit();
+}
+
+// 上傳圖片到 GitHub
 function uploadImageToGitHub($tmpFile, $imageName) {
     global $token, $repoOwner, $repoName, $branch;
 
@@ -43,7 +49,7 @@ function uploadImageToGitHub($tmpFile, $imageName) {
     return in_array($code, [200, 201]);
 }
 
-// 商品更新流程
+// 更新商品
 if (isset($_POST["action"]) && $_POST["action"] === "update") {
     if (!empty($_POST["Product_ID"]) && !empty($_POST["Product_name"]) && !empty($_POST["price"]) &&
         !empty($_POST["quantity"]) && !empty($_POST["Product_introduction"]) && !empty($_POST["Type"])) {
@@ -54,22 +60,30 @@ if (isset($_POST["action"]) && $_POST["action"] === "update") {
             $allowed_exts = ["jpg", "jpeg", "png", "gif"];
             $ext = strtolower(pathinfo($_FILES["Image"]["name"], PATHINFO_EXTENSION));
 
-            if (in_array($ext, $allowed_exts)) {
-                $imageName = substr(md5(uniqid()), 0, 40) . '.' . $ext;
-
-                // 上傳到 GitHub
-                if (uploadImageToGitHub($_FILES["Image"]["tmp_name"], $imageName)) {
-                    $image_url = $githubPagesUrl . $imageName;
-                } else {
-                    echo "錯誤：圖片無法上傳至 GitHub。";
-                    exit();
-                }
-            } else {
+            if (!in_array($ext, $allowed_exts)) {
                 echo "錯誤：圖片格式需為 JPG、JPEG、PNG 或 GIF。";
                 exit();
             }
+
+            if ($_FILES["Image"]["size"] > 3 * 1024 * 1024) {
+                echo "錯誤：圖片大小不能超過 3MB。";
+                exit();
+            }
+
+            if (!getimagesize($_FILES["Image"]["tmp_name"])) {
+                echo "錯誤：檔案不是有效的圖片。";
+                exit();
+            }
+
+            $imageName = substr(md5(uniqid()), 0, 40) . '.' . $ext;
+
+            if (uploadImageToGitHub($_FILES["Image"]["tmp_name"], $imageName)) {
+                $image_url = $githubPagesUrl . $imageName;
+            } else {
+                echo "錯誤：圖片無法上傳至 GitHub。";
+                exit();
+            }
         } else {
-            // 無新圖片，上次圖片保留
             $stmt = $link->prepare("SELECT Image FROM product WHERE Product_ID = ?");
             $stmt->bind_param("s", $_POST["Product_ID"]);
             $stmt->execute();
@@ -79,7 +93,7 @@ if (isset($_POST["action"]) && $_POST["action"] === "update") {
             $image_url = $old_image;
         }
 
-        // 更新商品
+        // 更新資料
         $stmt = $link->prepare("UPDATE product SET Product_name=?, Type=?, price=?, quantity=?, Product_introduction=?, Image=?, Remark=? WHERE Product_ID=?");
         $stmt->bind_param("ssiissss",
             $_POST["Product_name"],
@@ -97,12 +111,12 @@ if (isset($_POST["action"]) && $_POST["action"] === "update") {
         header("Location: Seller_Product.php");
         exit();
     } else {
-        echo "錯誤：欄位不得為空";
+        echo "錯誤：欄位不得為空。";
         exit();
     }
 }
 
-// 編輯時讀取資料
+// 載入原始資料
 if (isset($_GET["id"])) {
     $Product_ID = $_GET["id"];
     $stmt = $link->prepare("SELECT Product_name, Type, price, quantity, Product_introduction, Image, Remark FROM product WHERE Product_ID = ?");
@@ -125,7 +139,7 @@ if (isset($_GET["id"])) {
 <form method="post" enctype="multipart/form-data">
     <h1><b>更新商品資料</b></h1>
 
-    <label class = "labels1">商品編號:</label>
+    <label class="labels1">商品編號:</label>
     <input type="hidden" name="action" value="update" />
     <input class="input1" type="text" name="Product_ID" value="<?php echo htmlspecialchars($Product_ID); ?>" readonly /><br />
 
@@ -134,11 +148,11 @@ if (isset($_GET["id"])) {
     <?php endif; ?>
     <input type="file" name="Image" /><br />
 
-    <label class = "labels2">商品名稱:</label>
-    <input  class="input2" type="text" name="Product_name" value="<?php echo htmlspecialchars($Product_name); ?>" /><br />
+    <label class="labels2">商品名稱:</label>
+    <input class="input2" type="text" name="Product_name" value="<?php echo htmlspecialchars($Product_name); ?>" /><br />
 
     <label class = "labels3">商品價格:</label>
-    <input  class="input3" type="text" name="price" value="<?php echo htmlspecialchars($price); ?>" /><br />
+    <input class = "input3" type="text" name="price" value="<?php echo htmlspecialchars($price); ?>" /><br />
 
     <label class = "labels4">庫存數量：</label>
     <input  class="input4" type="text" name="quantity" value="<?php echo htmlspecialchars($quantity); ?>" /><br />
