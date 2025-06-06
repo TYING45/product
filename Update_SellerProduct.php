@@ -43,32 +43,36 @@ if (isset($_POST["action"]) && $_POST["action"] == "update") {
         $image_name = "";
 
         if (isset($_FILES["Image"]) && !empty($_FILES["Image"]["name"])) {
-            $allowed_types = ["jpg", "jpeg", "png", "gif"];
-            $file_ext = strtolower(pathinfo($_FILES["Image"]["name"], PATHINFO_EXTENSION));
+            if ($_FILES["Image"]["error"] === UPLOAD_ERR_OK) {
+                $allowed_types = ["jpg", "jpeg", "png", "gif"];
+                $file_ext = strtolower(pathinfo($_FILES["Image"]["name"], PATHINFO_EXTENSION));
 
-            if (in_array($file_ext, $allowed_types)) {
-                $image_name = uniqid() . "." . $file_ext;
-                $remote_path = "uploads/" . $image_name;
+                if (in_array($file_ext, $allowed_types)) {
+                    $image_name = uniqid() . "." . $file_ext;
+                    $remote_path = "uploads/" . $image_name;
 
-                $uploadResult = uploadImageToGitHub(
-                    $github_owner,
-                    $github_repo,
-                    $github_branch,
-                    $github_token,
-                    $_FILES["Image"]["tmp_name"],
-                    $remote_path
-                );
+                    $uploadResult = uploadImageToGitHub(
+                        $github_owner,
+                        $github_repo,
+                        $github_branch,
+                        $github_token,
+                        $_FILES["Image"]["tmp_name"],
+                        $remote_path
+                    );
 
-                $code = isset($uploadResult[0]) ? $uploadResult[0] : null;
-                $res = isset($uploadResult[1]) ? $uploadResult[1] : "無回應";
+                    $code = isset($uploadResult[0]) ? $uploadResult[0] : null;
+                    $res = isset($uploadResult[1]) ? $uploadResult[1] : "無回應";
 
-                if ($code === 201 || $code === 200) {
-                    // 成功
+                    if ($code === 201 || $code === 200) {
+                        // 成功
+                    } else {
+                        die("❌ GitHub 上傳圖片失敗<br>HTTP 狀態碼：$code<br>回應內容：$res");
+                    }
                 } else {
-                    die("❌ GitHub 上傳圖片失敗<br>HTTP 狀態碼：$code<br>回應內容：$res");
+                    die("❌ 錯誤：圖片格式必須為 JPG、JPEG、PNG 或 GIF");
                 }
             } else {
-                die("❌ 錯誤：圖片格式必須為 JPG、JPEG、PNG 或 GIF");
+                die("❌ 圖片上傳失敗，錯誤碼：" . $_FILES["Image"]["error"]);
             }
         } else {
             // 沒有新圖，保留原圖
@@ -115,9 +119,8 @@ if (isset($_GET["id"])) {
     $stmt->bind_param("s", $Product_ID);
     $stmt->execute();
     $stmt->bind_result($Product_name, $Type, $price, $quantity, $Product_introduction, $Image, $Remark);
-    if ($stmt->fetch()) {
-        $stmt->close();
-    }
+    $stmt->fetch();
+    $stmt->close();
 }
 ob_end_flush();
 ?>
