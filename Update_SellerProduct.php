@@ -138,10 +138,8 @@ ob_end_flush();
     <input class="input1" type="text" name="Product_ID" value="<?php echo htmlspecialchars($Product_ID); ?>" readonly /><br />
 
     <?php if (!empty($Image)): ?>
-        <!-- GitHub圖片URL示範，改成你的GitHub Raw網址 -->
-        <img src="https://raw.githubusercontent.com/<?php echo $github_owner;/<?php echo $github_repo; ?>/<?php echo $github_branch; ?>/uploads/<?php echo htmlspecialchars($Image); ?>" alt="Image" style="max-width:200px;" />
+    <img src="https://raw.githubusercontent.com/<?php echo $github_owner . '/' . $github_repo . '/' . $github_branch . '/uploads/' . htmlspecialchars($Image); ?>" alt="Image" style="max-width:200px;" />
     <?php endif; ?>
-
     <input type="file" name="Image" /><br />
 
     <label class="labels2">商品名稱:</label>
