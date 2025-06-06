@@ -6,7 +6,7 @@ include("sql_php.php");  // 你的資料庫連線設定，請確定 $link 已正
 $github_owner = "TYING45";
 $github_repo = "product";
 $github_branch = "main";
-$github_token = "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";
+$github_token = "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";
 
 // 取得 GitHub 檔案 sha（用於更新檔案）
 function getFileShaFromGitHub($owner, $repo, $branch, $token, $file_path) {
