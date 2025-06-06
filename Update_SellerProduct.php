@@ -34,6 +34,7 @@ function uploadImageToGitHub($owner, $repo, $branch, $token, $image_tmp_path, $r
     $content = base64_encode(file_get_contents($image_tmp_path));
     $url = "https://api.github.com/repos/$owner/$repo/contents/$remote_path";
 
+    // 取得檔案 sha (若存在)
     $sha = getFileShaFromGitHub($owner, $repo, $branch, $token, $remote_path);
 
     $data = [
@@ -43,7 +44,7 @@ function uploadImageToGitHub($owner, $repo, $branch, $token, $image_tmp_path, $r
     ];
 
     if ($sha) {
-        $data["sha"] = $sha;  // 帶入 sha 代表更新檔案
+        $data["sha"] = $sha;
     }
 
     $ch = curl_init($url);
