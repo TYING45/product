@@ -124,7 +124,7 @@ if (isset($_GET["id"])) {
     <input class="input1" type="text" name="Product_ID" value="<?php echo $Product_ID; ?>" readonly><br>
 
     <?php if (!empty($Image)): ?>
-        <img src="<?php echo $Image; ?>" alt="商品圖片" width="300"><br>
+        <img src="<?php echo $Image; ?>" alt="商品圖片" width="200"><br>
     <?php endif; ?>
     <input type="file" name="Image"><br>
 
