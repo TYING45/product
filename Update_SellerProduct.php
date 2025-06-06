@@ -6,7 +6,7 @@ include("sql_php.php");  // 請確認這個檔案有連接好 $link 變數
 $github_owner = "TYING45";
 $github_repo = "product";
 $github_branch = "main";
-$github_token ="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";
+$github_token ="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";
 
 // 上傳圖片到 GitHub 的函式（不存本機）
 function uploadImageToGitHub($owner, $repo, $branch, $token, $image_tmp_path, $remote_path) {
