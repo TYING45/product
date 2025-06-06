@@ -1,71 +1,76 @@
 <?php
+require_once __DIR__ . '/vendor/autoload.php';
 include("sql_php.php");
 
-// GitHub 設定
-$token = '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'; // ← 建議用環境變數管理，不要硬編碼
-$repoOwner = 'TYING45';
-$repoName = 'product';
-$branch = 'main';
-$githubPagesUrl = "https://tying45.github.io/product/images/";
+// 載入 .env
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
 
-// GitHub 上傳圖片
-function uploadImageToGitHub($fileContent, $fileName) {
+// 環境變數
+$token = $_ENV['GITHUB_TOKEN'];
+$repoOwner = $_ENV['GITHUB_REPO_OWNER'];
+$repoName = $_ENV['GITHUB_REPO_NAME'];
+$branch = $_ENV['GITHUB_BRANCH'];
+$githubPagesUrl = rtrim($_ENV['GITHUB_PAGES_URL'], '/') . '/';
+
+// GitHub API 上傳圖片
+function uploadImageToGitHub($tmpFile, $imageName) {
     global $token, $repoOwner, $repoName, $branch;
 
-    $content = base64_encode($fileContent);
-    $apiUrl = "https://api.github.com/repos/$repoOwner/$repoName/contents/images/$fileName";
+    $content = base64_encode(file_get_contents($tmpFile));
+    $url = "https://api.github.com/repos/$repoOwner/$repoName/contents/images/$imageName";
 
     $data = json_encode([
-        "message" => "Add image $fileName",
+        "message" => "Upload image $imageName",
         "branch" => $branch,
         "content" => $content
     ]);
 
-    $ch = curl_init($apiUrl);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        "Authorization: token $token",
-        "User-Agent: PHP"
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST => "PUT",
+        CURLOPT_POSTFIELDS => $data,
+        CURLOPT_HTTPHEADER => [
+            "Authorization: token $token",
+            "User-Agent: PHP"
+        ]
     ]);
-
     $response = curl_exec($ch);
-    $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
-    return ($httpcode === 201 || $httpcode === 200);
+    return in_array($code, [200, 201]);
 }
 
-if (isset($_POST["action"]) && $_POST["action"] == "update") {
+// 商品更新流程
+if (isset($_POST["action"]) && $_POST["action"] === "update") {
     if (!empty($_POST["Product_ID"]) && !empty($_POST["Product_name"]) && !empty($_POST["price"]) &&
         !empty($_POST["quantity"]) && !empty($_POST["Product_introduction"]) && !empty($_POST["Type"])) {
 
-        $image_url = ""; // 最終要存的圖片URL
+        $image_url = "";
 
-        // 如有新圖片，處理上傳
         if (!empty($_FILES["Image"]["name"])) {
-            $allowed_types = ["jpg", "jpeg", "png", "gif"];
-            $file_ext = strtolower(pathinfo($_FILES["Image"]["name"], PATHINFO_EXTENSION));
+            $allowed_exts = ["jpg", "jpeg", "png", "gif"];
+            $ext = strtolower(pathinfo($_FILES["Image"]["name"], PATHINFO_EXTENSION));
 
-            if (in_array($file_ext, $allowed_types)) {
-                $image_name = substr(md5(uniqid('', true)), 0, 40) . "." . $file_ext;
-                $fileContent = file_get_contents($_FILES["Image"]["tmp_name"]);
+            if (in_array($ext, $allowed_exts)) {
+                $imageName = substr(md5(uniqid()), 0, 40) . '.' . $ext;
 
-                if (!uploadImageToGitHub($fileContent, $image_name)) {
+                // 上傳到 GitHub
+                if (uploadImageToGitHub($_FILES["Image"]["tmp_name"], $imageName)) {
+                    $image_url = $githubPagesUrl . $imageName;
+                } else {
                     echo "錯誤：圖片無法上傳至 GitHub。";
                     exit();
                 }
-
-                $image_url = $githubPagesUrl . $image_name;
             } else {
-                echo "錯誤：圖片格式必須為 JPG、JPEG、PNG 或 GIF";
+                echo "錯誤：圖片格式需為 JPG、JPEG、PNG 或 GIF。";
                 exit();
             }
         } else {
-            // 未上傳新圖片，保留舊圖片
-            $query = "SELECT Image FROM product WHERE Product_ID=?";
-            $stmt = $link->prepare($query);
+            // 無新圖片，上次圖片保留
+            $stmt = $link->prepare("SELECT Image FROM product WHERE Product_ID = ?");
             $stmt->bind_param("s", $_POST["Product_ID"]);
             $stmt->execute();
             $stmt->bind_result($old_image);
@@ -74,9 +79,8 @@ if (isset($_POST["action"]) && $_POST["action"] == "update") {
             $image_url = $old_image;
         }
 
-        // 更新資料庫
-        $sql_query = "UPDATE `product` SET Product_name=?, Type=?, price=?, quantity=?, Product_introduction=?, Image=?, Remark=? WHERE Product_ID=?";
-        $stmt = $link->prepare($sql_query);
+        // 更新商品
+        $stmt = $link->prepare("UPDATE product SET Product_name=?, Type=?, price=?, quantity=?, Product_introduction=?, Image=?, Remark=? WHERE Product_ID=?");
         $stmt->bind_param("ssiissss",
             $_POST["Product_name"],
             $_POST["Type"],
@@ -92,16 +96,16 @@ if (isset($_POST["action"]) && $_POST["action"] == "update") {
 
         header("Location: Seller_Product.php");
         exit();
-
     } else {
-        echo "錯誤：有欄位未填";
+        echo "錯誤：欄位不得為空";
+        exit();
     }
 }
 
+// 編輯時讀取資料
 if (isset($_GET["id"])) {
     $Product_ID = $_GET["id"];
-    $sql_select = "SELECT Product_name, Type, price, quantity, Product_introduction, Image, Remark FROM product WHERE Product_ID = ?";
-    $stmt = $link->prepare($sql_select);
+    $stmt = $link->prepare("SELECT Product_name, Type, price, quantity, Product_introduction, Image, Remark FROM product WHERE Product_ID = ?");
     $stmt->bind_param("s", $Product_ID);
     $stmt->execute();
     $stmt->bind_result($Product_name, $Type, $price, $quantity, $Product_introduction, $Image, $Remark);
@@ -121,7 +125,7 @@ if (isset($_GET["id"])) {
 <form method="post" enctype="multipart/form-data">
     <h1><b>更新商品資料</b></h1>
 
-    <label class="labels1">商品編號:</label>
+    <label class = "labels1">商品編號:</label>
     <input type="hidden" name="action" value="update" />
     <input class="input1" type="text" name="Product_ID" value="<?php echo htmlspecialchars($Product_ID); ?>" readonly /><br />
 
@@ -130,17 +134,17 @@ if (isset($_GET["id"])) {
     <?php endif; ?>
     <input type="file" name="Image" /><br />
 
-    <label class="labels2">商品名稱:</label>
-    <input class="input2" type="text" name="Product_name" value="<?php echo htmlspecialchars($Product_name); ?>" /><br />
+    <label class = "labels2">商品名稱:</label>
+    <input  class="input2" type="text" name="Product_name" value="<?php echo htmlspecialchars($Product_name); ?>" /><br />
 
-    <label class="labels3">商品價格:</label>
-    <input class="input4" type="text" name="price" value="<?php echo htmlspecialchars($price); ?>" /><br />
+    <label class = "labels3">商品價格:</label>
+    <input  class="input3" type="text" name="price" value="<?php echo htmlspecialchars($price); ?>" /><br />
 
-    <label class="labels4">庫存數量：</label>
-    <input class="input4" type="text" name="quantity" value="<?php echo htmlspecialchars($quantity); ?>" /><br />
+    <label class = "labels4">庫存數量：</label>
+    <input  class="input4" type="text" name="quantity" value="<?php echo htmlspecialchars($quantity); ?>" /><br />
 
-    <label class="labels5">商品種類:</label>
-    <select class="input5" name="Type" required>
+    <label class = "labels5">商品種類:</label>
+    <select  class="input5" name="Type" required>
         <?php
         $types = ["家具", "家電", "衣物", "3C", "書", "玩具", "運動用品", "其他"];
         foreach ($types as $t) {
