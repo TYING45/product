@@ -2,11 +2,11 @@
 include("sql_php.php");
 
 // GitHub 設定
-$token = '你的 GitHub Token'; // ← 建議用環境變數管理，不要硬編碼
-$repoOwner = '你的 GitHub 用戶名';
-$repoName = '你的 Repo 名稱';
+$token = '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'; // ← 建議用環境變數管理，不要硬編碼
+$repoOwner = 'TYING45';
+$repoName = 'product';
 $branch = 'main';
-$githubPagesUrl = "https://你的用戶名.github.io/你的 Repo 名稱/images/";
+$githubPagesUrl = "https://tying45.github.io/product/images/";
 
 // GitHub 上傳圖片
 function uploadImageToGitHub($fileContent, $fileName) {
