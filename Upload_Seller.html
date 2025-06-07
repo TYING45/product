@@ -42,11 +42,12 @@
 <body>
 
     <h2>上傳 CSV 檔案</h2>
-    <form action="Upload_Seller.php" method="post" enctype="multipart/form-data">
-        <input type="file" name="fileUpload" accept=".csv" required>
+   <form action="Upload_Seller.php" method="post" enctype="multipart/form-data">
+        <label for="fileUpload">選擇 CSV 檔案：</label><br>
+        <input type="file" name="fileUpload" id="fileUpload" accept=".csv" required>
         <br>
-        <input type="button" value="取消" onclick="location.href='Seller.php'">
-        <button type="submit" name="output">上傳</button>
+        <button type="button" class="btn btn-cancel" onclick="location.href='Seller.php'">取消</button>
+        <button type="submit" class="btn" name="output">上傳</button>
     </form>
 
 </body>
