@@ -41,7 +41,7 @@ if (isset($_POST['output'])) {
                     $stmt = $link->prepare("UPDATE `seller` SET `Seller_name`=?, `Company`=?, `username`=?, `password`=?, `Phone`=?, `Email`=?, `Address`=? WHERE `Seller_ID`=?");
                     $stmt->bind_param("ssssssss", $Seller_name, $Company, $username, $password, $Phone, $Email, $Address, $Seller_ID);
                 } else {
-                    $stmt = $link->prepare("INSERT INTO `seller`(`Seller_ID`, `Seller_name`, `Company`, `username`, `password`, `Phone`, `Email`, `Address`, `role`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'seller')");
+                    $stmt = $link->prepare("INSERT INTO `seller`(`Seller_ID`, `Seller_name`, `Company`, `username`, `password`, `Phone`, `Email`, `Address`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
                     $stmt->bind_param("ssssssss", $Seller_ID, $Seller_name, $Company, $username, $password, $Phone, $Email, $Address);
                 }
                 $stmt->execute();
