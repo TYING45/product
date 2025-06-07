@@ -59,11 +59,7 @@ if (isset($_POST['output'])) {
             $repo = $_ENV['GITHUB_REPO_NAME'] ?? 'product';
             $branch = $_ENV['GITHUB_BRANCH'] ?? 'main';
             $path = 'uploads/seller/' . $csvFilename;
-
-            if (!$token || !$owner || !$repo) {
-                die("❌ 缺少 GitHub 設定，請確認 .env 是否正確");
-            }
-
+            
             $uploadUrl = "https://api.github.com/repos/$owner/$repo/contents/$path";
 
             // 建立 API payload
@@ -86,12 +82,6 @@ if (isset($_POST['output'])) {
 
             $result = curl_exec($ch);
             $httpStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-            if (curl_errno($ch)) {
-                $error = curl_error($ch);
-                curl_close($ch);
-                die("cURL 錯誤: $error");
-            }
 
             curl_close($ch);
 
