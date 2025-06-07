@@ -1,7 +1,7 @@
 <?php
 require 'vendor/autoload.php';
 include("sql_php.php");
-include_once 'Uplaod_Seller.html';
+include_once 'Upload_Seller.html';
 
 use Dotenv\Dotenv;
 
@@ -45,9 +45,9 @@ if (isset($_POST['output'])) {
                 $stmt->close();
 
                 if ($prevResult->num_rows > 0) {
-                    $updateQuery = "UPDATE `seller` SET `Seller_name`=?, `Company`=?, `username`=?, `password`=?, `Phone`=?, `Email`=?, `Address`=?, `role`=? WHERE `SellerID`=?";
+                    $updateQuery = "UPDATE `seller` SET `Seller_name`=?, `Company`=?, `username`=?, `password`=?, `Phone`=?, `Email`=?, `Address`=?, `role`=? WHERE `Seller_ID`=?";
                     $stmt = $link->prepare($updateQuery);
-                    $stmt->bind_param("sssssssss", $Seller_name, $Company, $username, $password, $Phone, $Email, $Address, $role, $SellerID);
+                    $stmt->bind_param("sssssssss", $Seller_name, $Company, $username, $password, $Phone, $Email, $Address, $role, $Seller_ID);
                     $stmt->execute();
                     $stmt->close();
                 } else {
