@@ -42,7 +42,7 @@ if (isset($_POST['output'])) {
                     $stmt->bind_param("ssssss", $Member_name, $password, $Phone, $Email, $Address, $Member_ID);
                 } else {
                     $stmt = $link->prepare("INSERT INTO `member`(`Member_ID`, `Member_name`,`password`, `Phone`, `Email`, `Address`) VALUES (?, ?, ?, ?, ?, ?)");
-                    $stmt->bind_param("ssssss", $Seller_ID, $Member_name, $password, $Phone, $Email, $Address);
+                    $stmt->bind_param("ssssss", $Member_ID, $Member_name, $password, $Phone, $Email, $Address);
                 }
                 $stmt->execute();
                 $stmt->close();
