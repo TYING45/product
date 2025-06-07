@@ -2,7 +2,7 @@
 include("sql_php.php");  
 include_once 'Uplaod_Menmber.html';  
 
-if(isset($_POST['output'])) {
+if (isset($_POST['output'])) {
     $csvMimes = array(
         'text/x-comma-separated-values', 'text/comma-separated-values',
         'application/octet-stream', 'application/vnd.ms-excel', 'application/x-csv',
@@ -17,44 +17,46 @@ if(isset($_POST['output'])) {
             if (!$csvFile) {
                 die("無法讀取 CSV 檔案");
             }
-            fgetcsv($csvFile);
+
+            // 跳過標題行
             fgetcsv($csvFile);
 
-            while (($row_result = fgetcsv($csvFile)) !== FALSE) {
-                $SellerID = $row_result[0];
-                $聯絡人 = $row_result[1];
-                $公司 = $row_result[2];  
-                $Seller_username = $row_result[3];
-                $Seller_password = $row_result[4];
-                $phone = $row_result[5];
-                $email = $row_result[6];
-                $地址 = $row_result[7];
+            while (($row = fgetcsv($csvFile)) !== FALSE) {
+                $SellerID = $row[0];
+                $Seller_name = $row[1]; 
+                $Company = $row[2];  
+                $username = $row[3];
+                $password = $row[4];
+                $Phone = $row[5];
+                $Email = $row[6];
+                $Address = $row[7];
+                $role = $row[8];
 
-                echo "$Seller_ID , $聯絡人, $公司, $Seller_username, $Seller_password,$phone,$email,$Address <br>";
+                echo "$SellerID, $Seller_name, $Company, $username, $password, $Phone, $Email, $Address, $role <br>";
 
                 // 查詢是否存在
-                $prevQuery = "SELECT * FROM `seller` WHERE `Seller_ID` = ?";
+                $prevQuery = "SELECT * FROM `seller` WHERE `SellerID` = ?";
                 $stmt = $link->prepare($prevQuery);
-                $stmt->bind_param("s", $Seller_ID);
+                $stmt->bind_param("s", $SellerID);
                 $stmt->execute();
                 $prevResult = $stmt->get_result();
                 $stmt->close();
 
                 if ($prevResult->num_rows > 0) {
-                    // 如果有更新資料
-                    $sqli_query = "UPDATE `seller` SET `Seller_name`=?,`Company`= ?, `username`=?, `password`=?, `Phone`=?, `Email`=?, `Address`=? WHERE `SellerID`=?";
-                    $stmt = $link->prepare($sqli_query);
-                    $stmt->bind_param("ssssssss", $Seller_name, $Company, $username ,$password,$Phone,$Email,$Address ,$SellerID);
+                    // 更新資料
+                    $updateQuery = "UPDATE `seller` SET `Seller_name`=?, `Company`=?, `username`=?, `password`=?, `Phone`=?, `Email`=?, `Address`=?, `role`=? WHERE `SellerID`=?";
+                    $stmt = $link->prepare($updateQuery);
+                    $stmt->bind_param("sssssssss", $Seller_name, $Company, $username, $password, $Phone, $Email, $Address, $role, $SellerID);
                     if (!$stmt->execute()) {
                         die("更新錯誤: " . $stmt->error);
                     }
                     $stmt->close();
                 } else {
-                    // 如果沒有就插入新資料
-                    $sqli_query = "INSERT INTO `seller`(`SellerID`, `Seller_name`, `Company`, `username`, `password`, `Address`, `phone`, `Address`) 
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-                    $stmt = $link->prepare($sqli_query);
-                    $stmt->bind_param("ssssssss", $SellerID , $Seller_name, $Company, $Seller_username, $Seller_password,$Phone,$Email,$Address);
+                    // 插入新資料
+                    $insertQuery = "INSERT INTO `seller`(`SellerID`, `Seller_name`, `Company`, `username`, `password`, `Phone`, `Email`, `Address`, `role`) 
+                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    $stmt = $link->prepare($insertQuery);
+                    $stmt->bind_param("sssssssss", $SellerID, $Seller_name, $Company, $username, $password, $Phone, $Email, $Address, $role);
                     if (!$stmt->execute()) {
                         die("插入錯誤: " . $stmt->error);
                     }
@@ -68,8 +70,7 @@ if(isset($_POST['output'])) {
     } else {
         die("請上傳 CSV 檔案");
     }
+    header("Location: Seller.php");
+    exit();
 }
-
-header("Location: Seller.php");
-exit();
 ?>
