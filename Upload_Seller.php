@@ -102,6 +102,21 @@ if (isset($_POST['output'])) {
             $result = curl_exec($ch);
             $httpStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
+            $result = curl_exec($ch);
+$httpStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+if (curl_errno($ch)) {
+    $curlError = curl_error($ch);
+    curl_close($ch);
+    die("cURL 錯誤: $curlError");
+}
+
+curl_close($ch);
+
+// 顯示 GitHub 回應內容方便除錯
+if ($httpStatus != 201 && $httpStatus != 200) {
+    die("GitHub 上傳失敗: HTTP $httpStatus\n回應內容: $result");
+}
 
             if ($httpStatus != 201 && $httpStatus != 200) {
                 die("GitHub 上傳失敗: $result");
