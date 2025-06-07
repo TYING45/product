@@ -1,6 +1,7 @@
 <?php  
+
 include("sql_php.php");  
-include_once 'Uplaod_Menmber.html';  
+include_once 'Upload_Menmber.html';  
 
 if(isset($_POST['output'])) {
     $csvMimes = array(
@@ -23,13 +24,12 @@ if(isset($_POST['output'])) {
             while (($row_result = fgetcsv($csvFile)) !== FALSE) {
                 $Member_ID = $row_result[0];
                 $Member_name = $row_result[1];
-                $username = $row_result[2]; 
-                $password = $row_result[3];
-                $Email = $row_result[4];
-                $Phone = $row_result[5];
-                $Address = $row_result[6];
+                $password = $row_result[2];
+                $Email = $row_result[3];
+                $Phone = $row_result[4];
+                $Address = $row_result[4];
 
-                echo "$Member_ID , $Member_name, $sername, $password, $email, $phone,$Address <br>";
+                echo "$Member_ID , $Member_name, $password, $Email, $Phone,$Address <br>";
 
                 // 查詢是否存在
                 $prevQuery = "SELECT * FROM `member` WHERE `Member_ID` = ?";
@@ -41,18 +41,18 @@ if(isset($_POST['output'])) {
 
                 if ($prevResult->num_rows > 0) {
                     // 如果有更新資料
-                    $sqli_query = "UPDATE `member` SET `Member_name`=?, `username`=?, `password`=?, `email`=?, `phone`=?, `Address`=? WHERE `Member_ID`=?";
+                    $sqli_query = "UPDATE `member` SET `Member_name`=?, `password`=?, `email`=?, `phone`=?, `Address`=? WHERE `Member_ID`=?";
                     $stmt = $link->prepare($sqli_query);
-                    $stmt->bind_param("sssssss", $Member_name, $username, $password, $email, $phone, $Address, $Member_ID);
+                    $stmt->bind_param("ssssss", $Member_name, $password, $Email, $Phone, $Address, $Member_ID);
                     if (!$stmt->execute()) {
                         die("更新錯誤: " . $stmt->error);
                     }
                     $stmt->close();
                 } else {
                     // 如果沒有就插入新資料
-                    $sqli_query = "INSERT INTO `member`(`Member_ID`, `Member_name`, `username`, `password`, `email`, `phone`, `Address`) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                    $sqli_query = "INSERT INTO `member`(`Member_ID`, `Member_name`, `username`, `password`, `Email`, `Phone`, `Address`) VALUES (?, ?, ?, ?, ?, ?, ?)";
                     $stmt = $link->prepare($sqli_query);
-                    $stmt->bind_param("sssssss", $Member_ID, $Member_name, username, $password, $email, $phone, $Address);
+                    $stmt->bind_param("ssssss", $Member_ID, $Member_name, $password, $Email, $Phone, $Address);
                     if (!$stmt->execute()) {
                         die("插入錯誤: " . $stmt->error);
                     }
