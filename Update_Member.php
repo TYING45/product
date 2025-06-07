@@ -64,9 +64,9 @@ if (isset($_GET["id"])) {
     <label class="labels5">電話:</label> 
     <input class="input5" type="text" name="Phone" value="<?php echo $Phone; ?>"><br>
     
-    <label class="labels6">E-mail:</label> 
-    <input class="input6" type="text" name="Email" value="<?php echo $Email; ?>"><br>
-
+    <label class="labels3">E-mail:</label> 
+    <input class="input3" type="text" name="Email" value="<?php echo $Email; ?>"><br>
+<br>
     <label>地址:</label><br>
     <textarea name="Address" rows="2" cols="100"><?php echo $Address; ?></textarea><br> 
     <input type="button" value="取消" onclick="location.href='Member.php'">    
