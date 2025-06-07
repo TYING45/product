@@ -1,7 +1,6 @@
 <?php
 require 'vendor/autoload.php';
 include("sql_php.php");
-include_once 'Upload_Seller.html';
 
 use Dotenv\Dotenv;
 
@@ -32,7 +31,6 @@ if (isset($_POST['output'])) {
                 list($Seller_ID, $Seller_name, $Company, $username, $password,
                      $Phone, $Email, $Address) = $row;
 
-                // 查詢是否已存在
                 $stmt = $link->prepare("SELECT * FROM `seller` WHERE `Seller_ID` = ?");
                 $stmt->bind_param("s", $Seller_ID);
                 $stmt->execute();
@@ -40,12 +38,10 @@ if (isset($_POST['output'])) {
                 $stmt->close();
 
                 if ($result->num_rows > 0) {
-                    // 更新
                     $stmt = $link->prepare("UPDATE `seller` SET `Seller_name`=?, `Company`=?, `username`=?, `password`=?, `Phone`=?, `Email`=?, `Address`=? WHERE `Seller_ID`=?");
                     $stmt->bind_param("ssssssss", $Seller_name, $Company, $username, $password, $Phone, $Email, $Address, $Seller_ID);
                 } else {
-                    // 新增
-                    $stmt = $link->prepare("INSERT INTO `seller`(`Seller_ID`, `Seller_name`, `Company`, `username`, `password`, `Phone`, `Email`, `Address`, `role`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                    $stmt = $link->prepare("INSERT INTO `seller`(`Seller_ID`, `Seller_name`, `Company`, `username`, `password`, `Phone`, `Email`, `Address`, `role`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'seller')");
                     $stmt->bind_param("ssssssss", $Seller_ID, $Seller_name, $Company, $username, $password, $Phone, $Email, $Address);
                 }
                 $stmt->execute();
@@ -59,17 +55,15 @@ if (isset($_POST['output'])) {
             $repo = $_ENV['GITHUB_REPO_NAME'] ?? 'product';
             $branch = $_ENV['GITHUB_BRANCH'] ?? 'main';
             $path = 'uploads/seller/' . $csvFilename;
-            
+
             $uploadUrl = "https://api.github.com/repos/$owner/$repo/contents/$path";
 
-            // 建立 API payload
             $data = [
                 "message" => "Upload CSV $csvFilename",
                 "content" => base64_encode($csvContent),
                 "branch" => $branch
             ];
 
-            // 發送 PUT 請求到 GitHub
             $ch = curl_init($uploadUrl);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
                 "Authorization: token $token",
@@ -82,20 +76,20 @@ if (isset($_POST['output'])) {
 
             $result = curl_exec($ch);
             $httpStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
             curl_close($ch);
 
-            // 成功跳轉
-            if ($uploadSuccess) {
+            // 成功後跳轉
+            if ($httpStatus === 201 || $httpStatus === 200) {
                 header("Location: Seller.php");
                 exit;
-        }
-            exit();
+            } else {
+                die("GitHub 上傳失敗");
+            }
         } else {
             die("檔案上傳失敗");
         }
     } else {
-        die("請上傳 CSV 檔案");
+        die("請上傳有效的 CSV 檔案");
     }
 }
 ?>
