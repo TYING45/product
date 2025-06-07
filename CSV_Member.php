@@ -5,7 +5,7 @@ $query = $link->query("SELECT * FROM `member`");
 
 if ($query->num_rows > 0) {
     $delimiter = ",";
-    $fileName = '會員.csv';
+    $fileName = '會員資料.csv';
 
     echo "\xEF\xBB\xBF";
     $fp = fopen('php://output', 'w');//防止亂碼
