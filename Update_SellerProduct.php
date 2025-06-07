@@ -20,7 +20,7 @@ include("sql_php.php");
 // GitHub 上傳圖片函式
 function uploadImageToGitHub($owner, $repo, $branch, $token, $image_tmp_path, $remote_path) {
     $content = base64_encode(file_get_contents($image_tmp_path));
-    $url = "https://api.github.com/TYING45/product/contents/$remote_path";
+    $url = "https://api.github.com/repos/TYING45/product/contents/$remote_path";
 
     $data = [
         "message" => "Add image $remote_path via PHP script",
