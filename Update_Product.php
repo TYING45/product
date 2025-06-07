@@ -160,7 +160,7 @@ if (isset($_GET["id"])) {
     <label class="labels4">庫存數量：</label>
     <input class="input4" type="text" name="quantity" value="<?php echo htmlspecialchars($quantity ?? ''); ?>" /><br />
 
-    <label>商品種類:</label>
+    <label>商品種類:</label><br>
     <select name="Type" required>
         <?php
         $types = ["家具", "家電", "衣物", "3C", "書", "玩具", "運動用品", "其他"];
@@ -177,7 +177,7 @@ if (isset($_GET["id"])) {
     <label>備註：</label><br />
     <textarea name="Remark" rows="2" cols="100"><?php echo htmlspecialchars($Remark ?? ''); ?></textarea><br />
 
-    <input type="button" value="取消" onclick="location.href='Seller_Product.php'" />
+    <input type="button" value="取消" onclick="location.href='Product.php'" />
     <button type="submit">更新</button>
 </form>
 </body>
