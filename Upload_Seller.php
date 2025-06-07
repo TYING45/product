@@ -1,7 +1,7 @@
 <?php
 require 'vendor/autoload.php';
 include("sql_php.php");
-include_once 'Uplaod_Seller.html';
+include_once 'Upload_Seller.html';
 
 use Dotenv\Dotenv;
 
