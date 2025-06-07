@@ -55,8 +55,8 @@ if (isset($_POST['output'])) {
 
             // GitHub 設定
             $token = $_ENV['GITHUB_TOKEN'] ?? '';
-            $owner = $_ENV['GITHUB_REPO_OWNER'] ?? '';
-            $repo = $_ENV['GITHUB_REPO_NAME'] ?? '';
+            $owner = $_ENV['GITHUB_REPO_OWNER'] ?? 'TYING45';
+            $repo = $_ENV['GITHUB_REPO_NAME'] ?? 'product';
             $branch = $_ENV['GITHUB_BRANCH'] ?? 'main';
             $path = 'uploads/seller/' . $csvFilename;
 
