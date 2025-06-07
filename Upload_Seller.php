@@ -42,7 +42,7 @@ if (isset($_POST['output'])) {
                 if ($result->num_rows > 0) {
                     // 更新
                     $stmt = $link->prepare("UPDATE `seller` SET `Seller_name`=?, `Company`=?, `username`=?, `password`=?, `Phone`=?, `Email`=?, `Address`=? WHERE `Seller_ID`=?");
-                    $stmt->bind_param("sssssssss", $Seller_name, $Company, $username, $password, $Phone, $Email, $Address, $Seller_ID);
+                    $stmt->bind_param("ssssssss", $Seller_name, $Company, $username, $password, $Phone, $Email, $Address, $Seller_ID);
                 } else {
                     // 新增
                     $stmt = $link->prepare("INSERT INTO `seller`(`Seller_ID`, `Seller_name`, `Company`, `username`, `password`, `Phone`, `Email`, `Address`, `role`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
