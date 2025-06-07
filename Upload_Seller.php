@@ -86,7 +86,10 @@ if (isset($_POST['output'])) {
             curl_close($ch);
 
             // 成功跳轉
-            header("Location: Seller.php");
+            if ($uploadSuccess) {
+                header("Location: Seller.php");
+                exit;
+        }
             exit();
         } else {
             die("檔案上傳失敗");
