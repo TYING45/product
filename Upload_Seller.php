@@ -79,12 +79,8 @@ if (isset($_POST['output'])) {
             curl_close($ch);
 
             // 成功後跳轉
-            if ($httpStatus === 201 || $httpStatus === 200) {
                 header("Location: Seller.php");
                 exit;
-            } else {
-                die("GitHub 上傳失敗");
-            }
         } else {
             die("檔案上傳失敗");
         }
