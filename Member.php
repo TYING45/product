@@ -5,7 +5,7 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 include("sql_php.php");
-$pageRow_records = 3; // 每頁顯示 10 筆資料
+$pageRow_records = 10; // 每頁顯示 10 筆資料
 $num_pages = isset($_GET['page']) ? intval($_GET['page']) : 1; // 取得目前頁數
 $startRow_records = ($num_pages - 1) * $pageRow_records; // 計算起始位置
 
@@ -170,8 +170,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['id']) && isset($_POST
             echo "<tr>";
             echo "<td>" . $row["Member_ID"] . "</td>";
             echo "<td>" . $row["Member_name"] . "</td>";
-            echo "<td>" . $row["Phone"] . "</td>";
             echo "<td>" . $row["Email"] . "</td>";
+            echo "<td>" . $row["Phone"] . "</td>";
             echo "<td> ******* </td>";
             echo "<td><a href='Update_Member.php?id=" . $row["Member_ID"] . "'>編輯</a></td>";
             echo "<td><a href='Del_Member.php?id=" . $row["Member_ID"] . "'>刪除</a></td>";
