@@ -1,10 +1,11 @@
 <?php
 require 'vendor/autoload.php';
 include("sql_php.php");
-include_once 'Uplaod_Seller.html';
+include_once 'Upload_Seller.html';
 
 use Dotenv\Dotenv;
 
+// 載入 .env
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
@@ -16,20 +17,23 @@ if (isset($_POST['output'])) {
         'application/vnd.msexcel', 'text/plain'
     ];
 
+    // 檢查檔案是否上傳且為 CSV 格式
     if (!empty($_FILES["fileUpload"]["name"]) && in_array($_FILES["fileUpload"]["type"], $csvMimes)) {
         if (is_uploaded_file($_FILES["fileUpload"]["tmp_name"])) {
             $csvFilePath = $_FILES["fileUpload"]["tmp_name"];
-            $csvFilename = basename($_FILES["fileUpload"]["name"]);
+            $originalFilename = basename($_FILES["fileUpload"]["name"]);
+            $csvFilename = time() . "_" . $originalFilename; // 避免重複檔名
             $csvContent = file_get_contents($csvFilePath);
 
             // 讀取 CSV 並寫入資料庫
             $csvFile = fopen($csvFilePath, "r");
-            fgetcsv($csvFile); // 跳過標題
+            fgetcsv($csvFile); // 跳過標題列
 
             while (($row = fgetcsv($csvFile)) !== FALSE) {
+                // 對應欄位
                 $Seller_ID = $row[0];
-                $Seller_name = $row[1]; 
-                $Company = $row[2];  
+                $Seller_name = $row[1];
+                $Company = $row[2];
                 $username = $row[3];
                 $password = $row[4];
                 $Phone = $row[5];
@@ -37,6 +41,7 @@ if (isset($_POST['output'])) {
                 $Address = $row[7];
                 $role = $row[8];
 
+                // 檢查是否已存在，更新或新增
                 $prevQuery = "SELECT * FROM `seller` WHERE `Seller_ID` = ?";
                 $stmt = $link->prepare($prevQuery);
                 $stmt->bind_param("s", $Seller_ID);
@@ -51,8 +56,7 @@ if (isset($_POST['output'])) {
                     $stmt->execute();
                     $stmt->close();
                 } else {
-                    $insertQuery = "INSERT INTO `seller`(`Seller_ID`, `Seller_name`, `Company`, `username`, `password`, `Phone`, `Email`, `Address`, `role`) 
-                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    $insertQuery = "INSERT INTO `seller`(`Seller_ID`, `Seller_name`, `Company`, `username`, `password`, `Phone`, `Email`, `Address`, `role`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
                     $stmt = $link->prepare($insertQuery);
                     $stmt->bind_param("sssssssss", $Seller_ID, $Seller_name, $Company, $username, $password, $Phone, $Email, $Address, $role);
                     $stmt->execute();
@@ -61,23 +65,34 @@ if (isset($_POST['output'])) {
             }
             fclose($csvFile);
 
-            $githubToken = $_ENV['GITHUB_TOKEN'];
-            $repo = $_ENV['GITHUB_REPO'];
-            $branch = $_ENV['GITHUB_BRANCH'];
-            $path = $_ENV['GITHUB_PATH'] . $csvFilename;
+            // 讀取 .env 參數
+            $githubToken = $_ENV['GITHUB_TOKEN'] ?? '';
+            $repoOwner = $_ENV['GITHUB_REPO_OWNER'] ?? 'TYING45';
+            $repoName = $_ENV['GITHUB_REPO_NAME'] ?? 'product';
+            $branch = $_ENV['GITHUB_BRANCH'] ?? 'main';
+            $uploadPath = 'uploads/seller/'; // 上傳路徑，依需要調整
+            $githubUsername = $repoOwner; // GitHub 使用者名稱 (user-agent)
 
-            $uploadUrl = "https://api.github.com/repos/TYING45/product/contents/$path";
+            if (!$githubToken || !$repoOwner || !$repoName) {
+                die("GitHub 設定不完整，請檢查 .env 中 GITHUB_TOKEN、GITHUB_REPO_OWNER、GITHUB_REPO_NAME");
+            }
 
+            // 拼接 GitHub API URL
+            $path = $uploadPath . $csvFilename;
+            $uploadUrl = "https://api.github.com/repos/$repoOwner/$repoName/contents/$path";
+
+            // 建立上傳資料
             $data = [
                 "message" => "Upload CSV $csvFilename",
                 "content" => base64_encode($csvContent),
                 "branch" => $branch
             ];
 
+            // 初始化 cURL 並執行 PUT 請求
             $ch = curl_init($uploadUrl);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
                 "Authorization: token $githubToken",
-                "User-Agent: ".$_ENV['GITHUB_USERNAME'],
+                "User-Agent: $githubUsername",
                 "Content-Type: application/json"
             ]);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -92,6 +107,7 @@ if (isset($_POST['output'])) {
                 die("GitHub 上傳失敗: $result");
             }
 
+            // 成功後導回賣家列表頁
             header("Location: Seller.php");
             exit();
         } else {
