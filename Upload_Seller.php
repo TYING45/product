@@ -1,25 +1,30 @@
-<?php  
-include("sql_php.php");  
-include_once 'Uplaod_Menmber.html';  
+<?php
+require 'vendor/autoload.php';
+include("sql_php.php");
+include_once 'Uplaod_Menmber.html';
+
+use Dotenv\Dotenv;
+
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->load();
 
 if (isset($_POST['output'])) {
-    $csvMimes = array(
+    $csvMimes = [
         'text/x-comma-separated-values', 'text/comma-separated-values',
         'application/octet-stream', 'application/vnd.ms-excel', 'application/x-csv',
         'text/x-csv', 'text/csv', 'application/csv', 'application/excel',
         'application/vnd.msexcel', 'text/plain'
-    );
+    ];
 
     if (!empty($_FILES["fileUpload"]["name"]) && in_array($_FILES["fileUpload"]["type"], $csvMimes)) {
         if (is_uploaded_file($_FILES["fileUpload"]["tmp_name"])) {
-            $csvFile = fopen($_FILES["fileUpload"]["tmp_name"], "r");
+            $csvFilePath = $_FILES["fileUpload"]["tmp_name"];
+            $csvFilename = basename($_FILES["fileUpload"]["name"]);
+            $csvContent = file_get_contents($csvFilePath);
 
-            if (!$csvFile) {
-                die("無法讀取 CSV 檔案");
-            }
-
-            // 跳過標題行
-            fgetcsv($csvFile);
+            // 讀取 CSV 並寫入資料庫
+            $csvFile = fopen($csvFilePath, "r");
+            fgetcsv($csvFile); // 跳過標題
 
             while (($row = fgetcsv($csvFile)) !== FALSE) {
                 $SellerID = $row[0];
@@ -32,9 +37,6 @@ if (isset($_POST['output'])) {
                 $Address = $row[7];
                 $role = $row[8];
 
-                echo "$SellerID, $Seller_name, $Company, $username, $password, $Phone, $Email, $Address, $role <br>";
-
-                // 查詢是否存在
                 $prevQuery = "SELECT * FROM `seller` WHERE `SellerID` = ?";
                 $stmt = $link->prepare($prevQuery);
                 $stmt->bind_param("s", $SellerID);
@@ -43,34 +45,59 @@ if (isset($_POST['output'])) {
                 $stmt->close();
 
                 if ($prevResult->num_rows > 0) {
-                    // 更新資料
                     $updateQuery = "UPDATE `seller` SET `Seller_name`=?, `Company`=?, `username`=?, `password`=?, `Phone`=?, `Email`=?, `Address`=?, `role`=? WHERE `SellerID`=?";
                     $stmt = $link->prepare($updateQuery);
                     $stmt->bind_param("sssssssss", $Seller_name, $Company, $username, $password, $Phone, $Email, $Address, $role, $SellerID);
-                    if (!$stmt->execute()) {
-                        die("更新錯誤: " . $stmt->error);
-                    }
+                    $stmt->execute();
                     $stmt->close();
                 } else {
-                    // 插入新資料
                     $insertQuery = "INSERT INTO `seller`(`SellerID`, `Seller_name`, `Company`, `username`, `password`, `Phone`, `Email`, `Address`, `role`) 
                                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
                     $stmt = $link->prepare($insertQuery);
                     $stmt->bind_param("sssssssss", $SellerID, $Seller_name, $Company, $username, $password, $Phone, $Email, $Address, $role);
-                    if (!$stmt->execute()) {
-                        die("插入錯誤: " . $stmt->error);
-                    }
+                    $stmt->execute();
                     $stmt->close();
                 }
             }
             fclose($csvFile);
+
+            $githubToken = $_ENV['GITHUB_TOKEN'];
+            $repo = $_ENV['GITHUB_REPO'];
+            $branch = $_ENV['GITHUB_BRANCH'];
+            $path = $_ENV['GITHUB_PATH'] . $csvFilename;
+
+            $uploadUrl = "https://api.github.com/repos/TYING45/product/contents/$path";
+
+            $data = [
+                "message" => "Upload CSV $csvFilename",
+                "content" => base64_encode($csvContent),
+                "branch" => $branch
+            ];
+
+            $ch = curl_init($uploadUrl);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                "Authorization: token $githubToken",
+                "User-Agent: ".$_ENV['GITHUB_USERNAME'],
+                "Content-Type: application/json"
+            ]);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+
+            $result = curl_exec($ch);
+            $httpStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($httpStatus != 201 && $httpStatus != 200) {
+                die("GitHub 上傳失敗: $result");
+            }
+
+            header("Location: Seller.php");
+            exit();
         } else {
             die("檔案上傳失敗");
         }
     } else {
         die("請上傳 CSV 檔案");
     }
-    header("Location: Seller.php");
-    exit();
 }
-?>
