@@ -37,11 +37,6 @@
         .btn-cancel:hover {
             background: #5a6268;
         }
-        small {
-            display: block;
-            margin-bottom: 10px;
-            color: #555;
-        }
     </style>
 </head>
 <body>
@@ -50,7 +45,6 @@
     <form action="Upload_Member.php" method="post" enctype="multipart/form-data">
         <label for="fileUpload">選擇 CSV 檔案：</label><br>
         <input type="file" name="fileUpload" id="fileUpload" accept=".csv" required>
-        <small>請上傳 UTF-8 編碼格式的 .csv 檔案，包含：Member_ID, Member_name, password, Phone, Email, Address</small>
         <br>
         <button type="button" class="btn btn-cancel" onclick="location.href='Member.php'">取消</button>
         <button type="submit" class="btn" name="output">上傳</button>
