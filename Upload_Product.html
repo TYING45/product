@@ -1,4 +1,11 @@
- body {
+ <!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV 檔案上傳</title>
+    <style>
+       body {
             text-align: center;
             margin-top: 50px;
             font-family: Arial, sans-serif;
@@ -35,3 +42,17 @@
             margin-bottom: 10px;
             color: #555;
         }
+    </style>
+</head>
+<body>
+
+    <h2>上傳 CSV 檔案</h2>
+    <form action="Upload_Product.php" method="post" enctype="multipart/form-data">
+        <input type="file" name="fileUpload" accept=".csv" required>
+        <br>
+        <input type="button" value="取消" onclick="location.href='Product.php'">
+        <button type="submit" name="output">上傳</button>
+    </form>
+
+</body>
+</html>
