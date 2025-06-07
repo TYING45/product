@@ -1,7 +1,7 @@
 <?php
 require 'vendor/autoload.php';
 include("sql_php.php");
-include_once 'Uplaod_Menmber.html';
+include_once 'Uplaod_Seller.html';
 
 use Dotenv\Dotenv;
 
@@ -27,7 +27,7 @@ if (isset($_POST['output'])) {
             fgetcsv($csvFile); // 跳過標題
 
             while (($row = fgetcsv($csvFile)) !== FALSE) {
-                $SellerID = $row[0];
+                $Seller_ID = $row[0];
                 $Seller_name = $row[1]; 
                 $Company = $row[2];  
                 $username = $row[3];
@@ -37,9 +37,9 @@ if (isset($_POST['output'])) {
                 $Address = $row[7];
                 $role = $row[8];
 
-                $prevQuery = "SELECT * FROM `seller` WHERE `SellerID` = ?";
+                $prevQuery = "SELECT * FROM `seller` WHERE `Seller_ID` = ?";
                 $stmt = $link->prepare($prevQuery);
-                $stmt->bind_param("s", $SellerID);
+                $stmt->bind_param("s", $Seller_ID);
                 $stmt->execute();
                 $prevResult = $stmt->get_result();
                 $stmt->close();
@@ -51,10 +51,10 @@ if (isset($_POST['output'])) {
                     $stmt->execute();
                     $stmt->close();
                 } else {
-                    $insertQuery = "INSERT INTO `seller`(`SellerID`, `Seller_name`, `Company`, `username`, `password`, `Phone`, `Email`, `Address`, `role`) 
+                    $insertQuery = "INSERT INTO `seller`(`Seller_ID`, `Seller_name`, `Company`, `username`, `password`, `Phone`, `Email`, `Address`, `role`) 
                                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
                     $stmt = $link->prepare($insertQuery);
-                    $stmt->bind_param("sssssssss", $SellerID, $Seller_name, $Company, $username, $password, $Phone, $Email, $Address, $role);
+                    $stmt->bind_param("sssssssss", $Seller_ID, $Seller_name, $Company, $username, $password, $Phone, $Email, $Address, $role);
                     $stmt->execute();
                     $stmt->close();
                 }
