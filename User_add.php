@@ -13,10 +13,9 @@ if (isset($_POST["action"]) && $_POST["action"] == "add") {
         $new_num = $max_num + 1;
         $new_id = "S" . str_pad($new_num, 3, "0", STR_PAD_LEFT);  // 例如 S003
 
-        $hashedPassword = password_hash($_POST["password"], PASSWORD_DEFAULT);
 
         $stmt = $link->prepare("INSERT INTO `seller`(`Seller_ID`, `Seller_name`, `username`, `password`, `phone`, `email`, `Address`) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("sssssss", $new_id, $_POST["name"], $_POST["username"], $hashedPassword, $_POST["phone"], $_POST["email"], $_POST["address"]);
+        $stmt->bind_param("sssssss", $new_id, $_POST["name"], $_POST["username"], $_POST["password"], $_POST["phone"], $_POST["email"], $_POST["address"]);
 
         if ($stmt->execute()) {
             header("Location: login.php");
