@@ -9,8 +9,8 @@ $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
 // 讀取 GitHub 設定
-$github_owner = $_ENV['GITHUB_OWNER'] ?? '';
-$github_repo = $_ENV['GITHUB_REPO'] ?? '';
+$github_owner = $_ENV['GITHUB_OWNER'] ?? 'TYING45';
+$github_repo = $_ENV['GITHUB_REPO'] ?? 'product';
 $github_branch = $_ENV['GITHUB_BRANCH'] ?? 'main';
 $github_token = $_ENV['GITHUB_TOKEN'] ?? '';
 
@@ -20,7 +20,7 @@ include("sql_php.php");
 // GitHub 上傳圖片函式
 function uploadImageToGitHub($owner, $repo, $branch, $token, $image_tmp_path, $remote_path) {
     $content = base64_encode(file_get_contents($image_tmp_path));
-    $url = "https://api.github.com/repos/$owner/$repo/contents/$remote_path";
+    $url = "https://api.github.com/repos/TYING45/product/contents/$remote_path";
 
     $data = [
         "message" => "Add image $remote_path via PHP script",
@@ -145,7 +145,8 @@ if (isset($_GET["id"])) {
     <input class="input1" type="text" name="Product_ID" value="<?php echo htmlspecialchars($Product_ID ?? ''); ?>" readonly /><br />
 
     <?php if (!empty($Image)): ?>
-        <img src="https://raw.githubusercontent.com/<?php echo $github_owner . '/' . $github_repo . '/' . $github_branch . '/uploads/' . htmlspecialchars($Image); ?>" alt="Image" />
+       <img src="https://raw.githubusercontent.com/<?php echo $github_owner . '/' . $github_repo . '/' . $github_branch . '/uploads/' . htmlspecialchars($Image); ?>" alt="Image" />
+
     <?php endif; ?>
 
     <input type="file" name="Image" /><br />
