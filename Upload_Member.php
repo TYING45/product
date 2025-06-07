@@ -1,4 +1,3 @@
-
 <?php
 require 'vendor/autoload.php';
 include("sql_php.php");
