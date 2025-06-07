@@ -79,7 +79,7 @@ if (isset($_POST['output'])) {
 
             // 拼接 GitHub API URL
             $path = $uploadPath . $csvFilename;
-            $uploadUrl = "https://api.github.com/repos/$repoOwner/$repoName/contents/$path";
+            $uploadUrl = "https://api.github.com/repos/TYING45/product/contents/$path";
 
             // 建立上傳資料
             $data = [
