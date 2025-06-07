@@ -170,8 +170,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['id']) && isset($_POST
             echo "<tr>";
             echo "<td>" . $row["Member_ID"] . "</td>";
             echo "<td>" . $row["Member_name"] . "</td>";
-            echo "<td>" . $row["Email"] . "</td>";
             echo "<td>" . $row["Phone"] . "</td>";
+            echo "<td>" . $row["Email"] . "</td>";
             echo "<td> ******* </td>";
             echo "<td><a href='Update_Member.php?id=" . $row["Member_ID"] . "'>編輯</a></td>";
             echo "<td><a href='Del_Member.php?id=" . $row["Member_ID"] . "'>刪除</a></td>";
