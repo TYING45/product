@@ -70,7 +70,7 @@ if (isset($_POST['output'])) {
             $repoOwner = $_ENV['GITHUB_REPO_OWNER'] ?? 'TYING45';
             $repoName = $_ENV['GITHUB_REPO_NAME'] ?? 'product';
             $branch = $_ENV['GITHUB_BRANCH'] ?? 'main';
-            $uploadPath = 'uploads'; // 上傳路徑，依需要調整
+            $uploadPath = 'uploads/'; // 上傳路徑，依需要調整
             $githubUsername = $repoOwner; // GitHub 使用者名稱 (user-agent)
 
             if (!$githubToken || !$repoOwner || !$repoName) {
