@@ -30,7 +30,7 @@ if (isset($_POST['output'])) {
 
             while (($row = fgetcsv($csvFile)) !== FALSE) {
                 list($Seller_ID, $Seller_name, $Company, $username, $password,
-                     $Phone, $Email, $Address, $role) = $row;
+                     $Phone, $Email, $Address) = $row;
 
                 // 查詢是否已存在
                 $stmt = $link->prepare("SELECT * FROM `seller` WHERE `Seller_ID` = ?");
