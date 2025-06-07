@@ -160,8 +160,8 @@ if (isset($_GET["id"])) {
     <label class="labels4">庫存數量：</label>
     <input class="input4" type="text" name="quantity" value="<?php echo htmlspecialchars($quantity ?? ''); ?>" /><br />
 
-    <label class="labels5">商品種類:</label>
-    <select class="input5" name="Type" required>
+    <label>商品種類:</label><br>
+    <select name="Type" required>
         <?php
         $types = ["家具", "家電", "衣物", "3C", "書", "玩具", "運動用品", "其他"];
         foreach ($types as $t) {
