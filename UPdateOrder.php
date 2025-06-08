@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $sql_update_quantity = "UPDATE product SET Sell_quantity = Sell_quantity + ? WHERE id = ?";
             $stmt_update = $link->prepare($sql_update_quantity);
-            $stmt_update->bind_param("ii", $quantity, $product_id);
+            $stmt_update->bind_param("is", $quantity, $product_id);
             $stmt_update->execute();
         }
     }
