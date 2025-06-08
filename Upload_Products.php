@@ -8,22 +8,31 @@ use Dotenv\Dotenv;
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-// 保留檔案原名，僅移除潛在危險字元（例如換行符）
+// 清理檔案名稱：保留檔名但移除危險字元
 function clean_filename($filename) {
     return preg_replace('/[\x00-\x1F\x7F]/', '', $filename); 
 }
 
-// 下載或搬移圖片
-function handle_image($imageField) {
+// 處理圖片：下載遠端或搬移本地
+function handle_image($imageField, &$errors, $productId, $productName) {
     $uploadDir = "uploads/";
     $csvImageDir = "uploads_csv/";
+
+    if (!$imageField || trim($imageField) === '') {
+        $errors[] = "❌ [產品 $productId] 圖片欄位為空";
+        return '';
+    }
 
     if (filter_var($imageField, FILTER_VALIDATE_URL)) {
         $imageName = clean_filename(basename(parse_url($imageField, PHP_URL_PATH)));
         $savePath = $uploadDir . $imageName;
 
         if (!file_exists($savePath)) {
-            $imageData = file_get_contents($imageField);
+            $imageData = @file_get_contents($imageField);
+            if ($imageData === false) {
+                $errors[] = "❌ [產品 $productId] 無法下載圖片網址：$imageField";
+                return '';
+            }
             file_put_contents($savePath, $imageData);
         }
     } else {
@@ -31,7 +40,12 @@ function handle_image($imageField) {
         $srcPath = $csvImageDir . $imageName;
         $destPath = $uploadDir . $imageName;
 
-        if (file_exists($srcPath) && !file_exists($destPath)) {
+        if (!file_exists($srcPath)) {
+            $errors[] = "❌ [產品 $productId] 找不到圖片檔：$srcPath";
+            return '';
+        }
+
+        if (!file_exists($destPath)) {
             copy($srcPath, $destPath);
         }
     }
@@ -39,7 +53,7 @@ function handle_image($imageField) {
     return $imageName;
 }
 
-// 查詢 GitHub 上是否已有該檔案
+// 取得 GitHub 上檔案的 SHA（更新用）
 function get_file_sha_from_github($path) {
     $token = $_ENV['GITHUB_TOKEN'];
     $owner = $_ENV['GITHUB_REPO_OWNER'] ?? 'TYING45';
@@ -82,7 +96,7 @@ function upload_to_github($filename, $content) {
     ];
 
     if ($sha) {
-        $data['sha'] = $sha; // 加上 sha 表示是更新
+        $data['sha'] = $sha;
     }
 
     $uploadUrl = "https://api.github.com/repos/$owner/$repo/contents/" . rawurlencode($path);
@@ -119,27 +133,27 @@ if (isset($_POST['output'])) {
         if (is_uploaded_file($_FILES["fileUpload"]["tmp_name"])) {
             $csvFilename = basename($_FILES["fileUpload"]["name"]);
             $csvContent = file_get_contents($_FILES["fileUpload"]["tmp_name"]);
-
             $csvFile = fopen($_FILES["fileUpload"]["tmp_name"], "r");
 
-            fgetcsv($csvFile); // 跳過第一行（標題）
-            fgetcsv($csvFile); // 跳過第二行（說明）
+            fgetcsv($csvFile); // skip header
+            fgetcsv($csvFile); // skip description
 
-            while (($row_result = fgetcsv($csvFile)) !== FALSE) {
-                $Product_ID = $row_result[0];
-                $Seller_ID = $row_result[1];
-                $Product_name = $row_result[2];
-                $Type = $row_result[3]; 
-                $quantity = intval($row_result[4]);
-                $Product_introduction = $row_result[5];
-                $price = intval($row_result[6]);
-                $Image = $row_result[7];
-                $Remark = $row_result[8];
-                $Sell_quantity = $row_result[9];
+            $errors = [];
 
-                $imageFilename = handle_image($Image);
+            while (($row = fgetcsv($csvFile)) !== FALSE) {
+                $Product_ID = $row[0];
+                $Seller_ID = $row[1];
+                $Product_name = $row[2];
+                $Type = $row[3]; 
+                $quantity = intval($row[4]);
+                $Product_introduction = $row[5];
+                $price = intval($row[6]);
+                $Image = $row[7];
+                $Remark = $row[8];
+                $Sell_quantity = $row[9];
 
-                // 檢查是否存在
+                $imageFilename = handle_image($Image, $errors, $Product_ID, $Product_name);
+
                 $prevQuery = "SELECT * FROM `product` WHERE `Product_ID` = ?";
                 $stmt = $link->prepare($prevQuery);
                 $stmt->bind_param("s", $Product_ID);
@@ -148,7 +162,6 @@ if (isset($_POST['output'])) {
                 $stmt->close();
 
                 if ($prevResult->num_rows > 0) {
-                    // 更新
                     $sql = "UPDATE `product` 
                             SET Product_name=?, Seller_ID=?, quantity=?, Product_introduction=?, price=?, Image=?, Remark=?, Type=?, Sell_quantity=? 
                             WHERE Product_ID=?";
@@ -157,7 +170,6 @@ if (isset($_POST['output'])) {
                     $stmt->execute();
                     $stmt->close();
                 } else {
-                    // 新增
                     $sql = "INSERT INTO `product` 
                             (`Product_ID`, `Seller_ID`, `Product_name`, `Type`, `quantity`, `Product_introduction`, `price`, `Image`, `Remark`, `Sell_quantity`) 
                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -172,6 +184,13 @@ if (isset($_POST['output'])) {
 
             // 上傳 CSV 到 GitHub
             upload_to_github($csvFilename, $csvContent);
+
+            // 寫入錯誤 log
+            if (!empty($errors)) {
+                file_put_contents("upload_errors.log", implode("\n", $errors));
+                echo "<h3>圖片處理錯誤：</h3><ul><li>" . implode("</li><li>", $errors) . "</li></ul>";
+                exit(); // 顯示錯誤後停止，不 redirect
+            }
 
         } else {
             die("檔案上傳失敗");
