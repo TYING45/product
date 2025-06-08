@@ -38,11 +38,11 @@ if (isset($_POST['output'])) {
                 $stmt->close();
 
                 if ($result->num_rows > 0) {
-                    $stmt = $link->prepare("UPDATE `seller` SET `Seller_name`=?, `Company`=?, `username`=?, `password`=?, `Phone`=?, `Email`=?, `Address`=? WHERE `Seller_ID`=?");
-                    $stmt->bind_param("ssssssss", $Seller_name, $Company, $username, $password, $Phone, $Email, $Address, $Seller_ID);
+                    $stmt = $link->prepare("UPDATE `seller` SET `Seller_name`=?, `Company`=?, `username`=?, `password`=?, `Email`=? , `Phone`=?, `Address`=? WHERE `Seller_ID`=?");
+                    $stmt->bind_param("ssssssss", $Seller_name, $Company, $username, $password, $Email, $Phone, $Address, $Seller_ID);
                 } else {
-                    $stmt = $link->prepare("INSERT INTO `seller`(`Seller_ID`, `Seller_name`, `Company`, `username`, `password`, `Phone`, `Email`, `Address`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-                    $stmt->bind_param("ssssssss", $Seller_ID, $Seller_name, $Company, $username, $password, $Phone, $Email, $Address);
+                    $stmt = $link->prepare("INSERT INTO `seller`(`Seller_ID`, `Seller_name`, `Company`, `username`, `password`, `Email` ,`Phone`, `Address`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                    $stmt->bind_param("ssssssss", $Seller_ID, $Seller_name, $Company, $username, $password, $Email, $Phone, $Address);
                 }
                 $stmt->execute();
                 $stmt->close();
