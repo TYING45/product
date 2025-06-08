@@ -18,6 +18,7 @@ $page = max(1, intval($_GET['page'] ?? 1));
 $items_per_page = 10;
 $offset = ($page - 1) * $items_per_page;
 
+// 計算總筆數
 $sql_count = "
     SELECT COUNT(DISTINCT o.id) AS total 
     FROM ordershop o
@@ -62,15 +63,19 @@ $result = $stmt->get_result();
 $total_rows = $result->fetch_assoc()['total'] ?? 0;
 $total_pages = ceil($total_rows / $items_per_page);
 
+// 主查詢：取出訂單 + 該賣家商品總額
 $sql = "
-    SELECT DISTINCT o.*
+    SELECT DISTINCT o.*, 
+        (SELECT SUM(oi.quantity * oi.price)
+         FROM order_items oi 
+         WHERE oi.order_id = o.id AND oi.Seller_ID = ?) AS seller_total
     FROM ordershop o
     INNER JOIN order_items oi ON o.id = oi.order_id
     WHERE oi.Seller_ID = ?
 ";
 
-$params = [$seller_id];
-$types = "s";
+$params = [$seller_id, $seller_id]; // 用在子查詢與主查詢
+$types = "ss";
 
 if ($search_keyword !== '') {
     $sql .= " AND (o.Order_ID LIKE CONCAT('%', ?, '%') OR o.Member_ID IN (SELECT Member_ID FROM member WHERE Member_Name LIKE CONCAT('%', ?, '%'))) ";
@@ -126,17 +131,8 @@ $result = $stmt->get_result();
     <ul class="topmenu">
         <button onclick="toggleSidebar()" class="img-button"></button>
         <li><a href="#">網頁前端</a></li>
-        <li><a href="login.php">登出</a></li>
-    </ul>
-</div>
-
-<div id="top-menu">
-    <ul class="topmenu">
-       <li> <button onclick="toggleSidebar()" class="img-button"></button></li>
-       <li></li>
-        <li><a href="#">網頁前端</a></li>
         <li><a href="logout.php">登出</a></li>
-    </ul>   
+    </ul>
 </div>
 
 <div id="leftside">
@@ -191,13 +187,14 @@ $result = $stmt->get_result();
             <option value="已付款" <?= $payment_status === '已付款' ? 'selected' : '' ?>>已付款</option>
         </select>
         <select name="order_status">
-        <option value="">全部訂單狀態</option>
+            <option value="">全部訂單狀態</option>
             <option value="未處理" <?= $order_status === '未處理' ? 'selected' : '' ?>>未處理</option>
             <option value="訂單處理中" <?= $order_status === '訂單處理中' ? 'selected' : '' ?>>訂單處理中</option>
             <option value="商品寄出" <?= $order_status === '商品寄出' ? 'selected' : '' ?>>商品寄出</option>
             <option value="商品退貨" <?= $order_status === '商品退貨' ? 'selected' : '' ?>>商品退貨</option>
             <option value="交易取消" <?= $order_status === '交易取消' ? 'selected' : '' ?>>交易取消</option>
             <option value="結案" <?= $order_status === '結案' ? 'selected' : '' ?>>結案</option>
+        </select>
         <input type="submit" value="查詢">
     </form>
 
@@ -208,13 +205,13 @@ $result = $stmt->get_result();
             <th>訂購日期</th>
             <th>付款狀態</th>
             <th>訂單狀態</th>
-            <th>總金額</th>
+            <th>賣家商品總額</th>
             <th>操作</th>
         </tr>
         </thead>
         <tbody>
         <?php if ($result->num_rows === 0): ?>
-            <tr><td colspan="7" style="text-align:center;">沒有資料</td></tr>
+            <tr><td colspan="6" style="text-align:center;">沒有資料</td></tr>
         <?php else: ?>
             <?php while ($order = $result->fetch_assoc()): ?>
                 <tr>
@@ -222,7 +219,7 @@ $result = $stmt->get_result();
                     <td><?= htmlspecialchars($order['Order_Date']) ?></td>
                     <td><?= htmlspecialchars($order['Payment_status'] ?? '尚未付款') ?></td>
                     <td><?= htmlspecialchars($order['Order_status'] ?? '') ?></td>
-                    <td><?= htmlspecialchars(number_format(($order['total_price'] ?? 0) + ($order['shipping_fee'] ?? 0), 2)) ?></td>
+                    <td><?= htmlspecialchars(number_format($order['seller_total'], 2)) ?></td>
                     <td><a href="UpdateSeller_Order.php?Order_ID=<?= urlencode($order['Order_ID']) ?>">查看</a></td>
                 </tr>
             <?php endwhile; ?>
@@ -236,7 +233,7 @@ $result = $stmt->get_result();
                 <?php if ($p == $page): ?>
                     <strong><?= $p ?></strong>
                 <?php else: ?>
-                    <a href="?page=<?= $p ?>&search=<?= urlencode($search_keyword) ?>&year=<?= urlencode($year) ?>&month=<?= urlencode($month) ?>"><?= $p ?></a>
+                    <a href="?page=<?= $p ?>&search=<?= urlencode($search_keyword) ?>&year=<?= urlencode($year) ?>&month=<?= urlencode($month) ?>&payment_status=<?= urlencode($payment_status) ?>&order_status=<?= urlencode($order_status) ?>"><?= $p ?></a>
                 <?php endif; ?>
                 &nbsp;
             <?php endfor; ?>
