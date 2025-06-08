@@ -177,7 +177,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['id']) && isset($_POST
             echo "<td>" . $row["Phone"] . "</td>";
             echo "<td>" . $row["Email"] . "</td>";
             echo "<td>" . $row["username"] . "</td>";
-            echo "<td>" . $row["password"] . "</td>";
+            echo "<td>********</td>";
             echo "<td>" . $row["Address"] . "</td>";
             echo "<td><a href='Update_Seller.php?id=" . $row["Seller_ID"] . "'>詳細</a></td>";
             echo "<td><a href='Del_Seller.php?id=" . $row["Seller_ID"] . "'>刪除</a></td>";
