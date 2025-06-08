@@ -9,9 +9,25 @@ if (!isset($_SESSION['username']) || !isset($_SESSION['Seller_ID'])) {
 
 include("sql_php.php");
 
-// 根據賣家 ID 撈取資料數量
-function getSellerCount($link, $table, $sellerId) {
-    $stmt = $link->prepare("SELECT COUNT(*) AS total FROM `$table` WHERE `Seller_ID` = ?");
+// 查詢商品數量
+function getSellerProductCount($link, $sellerId) {
+    $stmt = $link->prepare("SELECT COUNT(*) AS total FROM product WHERE Seller_ID = ?");
+    $stmt->bind_param("i", $sellerId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    return $row['total'];
+}
+
+// 查詢賣家相關訂單數（去除重複訂單）
+function getSellerOrderCount($link, $sellerId) {
+    $stmt = $link->prepare("
+        SELECT COUNT(DISTINCT o.Order_ID) AS total
+        FROM ordershop o
+        JOIN orderdetail od ON o.Order_ID = od.Order_ID
+        JOIN product p ON od.Product_ID = p.Product_ID
+        WHERE p.Seller_ID = ?
+    ");
     $stmt->bind_param("i", $sellerId);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -20,8 +36,8 @@ function getSellerCount($link, $table, $sellerId) {
 }
 
 $sellerId = $_SESSION['Seller_ID'];
-$productCount = getSellerCount($link, 'product', $sellerId);
-$orderCount = getSellerCount($link, 'ordershop', $sellerId);
+$productCount = getSellerProductCount($link, $sellerId);
+$orderCount = getSellerOrderCount($link, $sellerId);
 ?>
 
 <!DOCTYPE html>
