@@ -4,50 +4,47 @@ if (!isset($_SESSION['username'])) {
     header("Location: login.php");
     exit();
 }
+include("sql_php.php"); // 你的資料庫連線檔
 
-include("sql_php.php");
-
-// 取得角色與 Seller_ID
+// 取得使用者角色與 Seller_ID
 $role = $_SESSION['role'] ?? '';
 $sellerID = $_SESSION['Seller_ID'] ?? null;
 
-// 取得月份與類別篩選
+// 取得當前月份，格式: YYYY-MM
 $currentMonth = date('Y-m');
+
+// 最近6個月
 $months = [];
 for ($i = 5; $i >= 0; $i--) {
     $months[] = date('Y-m', strtotime("-$i month"));
 }
 
+// 選擇的月份（預設本月）
 $selectedMonth = $_GET['month'] ?? $currentMonth;
 if (!in_array($selectedMonth, $months)) {
     $selectedMonth = $currentMonth;
 }
 
+// 商品類別（固定）
 $allTypes = ['家具','家電', '衣物','3C', '書','玩具','運動用品','其他'];
-$typeFilter = $_GET['type'] ?? '';
 
-// 篩選條件
-$typeCondition = '';
-if ($typeFilter && in_array($typeFilter, $allTypes)) {
-    $typeCondition = "AND p.Type = '" . $link->real_escape_string($typeFilter) . "'";
-}
-
+// 賣家條件：seller只能看自己資料
 $sellerCondition = '';
 if ($role === 'seller' && $sellerID !== null) {
-    $sellerCondition = "AND p.Seller_ID = '" . $link->real_escape_string($sellerID) . "'";
+    $escapedSellerID = $link->real_escape_string($sellerID);
+    $sellerCondition = "AND p.Seller_ID = '$escapedSellerID'";
 }
 
-// 撈類別總計 (數量&金額)
+// 撈每個類別銷售數量（只算已付款未取消）
 $sql = "
-    SELECT p.Type,
-           SUM(oi.quantity) AS total_sold,
-           SUM(oi.quantity * oi.price) AS total_amount
+    SELECT 
+        p.Type,
+        SUM(oi.quantity) AS total_sold
     FROM order_items oi
     JOIN product p ON oi.product_id = p.Product_ID
     JOIN ordershop o ON oi.order_id = o.id
     WHERE o.Order_status NOT IN ('取消', '未付款')
-      AND DATE_FORMAT(o.Order_Date, '%Y-%m') = '$selectedMonth'
-      $typeCondition
+      AND DATE_FORMAT(o.Order_Date, '%Y-%m') = '{$link->real_escape_string($selectedMonth)}'
       $sellerCondition
     GROUP BY p.Type
     ORDER BY p.Type
@@ -55,39 +52,39 @@ $sql = "
 
 $result = $link->query($sql);
 
-// 初始化資料補0
 $data = [];
-foreach ($allTypes as $t) {
-    $data[$t] = ['total_sold' => 0, 'total_amount' => 0];
-}
 while ($row = $result->fetch_assoc()) {
-    $type = trim($row['Type']);
-    $data[$type] = [
-        'total_sold' => (int)$row['total_sold'],
-        'total_amount' => (float)$row['total_amount'],
-    ];
+    $data[$row['Type']] = (int)$row['total_sold'];
 }
 
-// 撈該類別產品明細（若有指定類別）
-$productDetails = [];
-if ($typeFilter && in_array($typeFilter, $allTypes)) {
-    $sqlDetails = "
-        SELECT p.Product_ID, p.Product_Name,
-               SUM(oi.quantity) AS total_sold,
-               SUM(oi.quantity * oi.price) AS total_amount
+// 確保每個類別都有欄位，即使沒銷售也顯示0
+foreach ($allTypes as $type) {
+    if (!isset($data[$type])) {
+        $data[$type] = 0;
+    }
+}
+
+// 取得詳細類別查詢參數，點分類名稱會帶入
+$detailedType = $_GET['detail_type'] ?? '';
+$detailedData = [];
+
+if ($detailedType && in_array($detailedType, $allTypes)) {
+    $escType = $link->real_escape_string($detailedType);
+    $sqlDetail = "
+        SELECT p.Product_Name, SUM(oi.quantity) AS qty_sold
         FROM order_items oi
         JOIN product p ON oi.product_id = p.Product_ID
         JOIN ordershop o ON oi.order_id = o.id
-        WHERE o.Order_status NOT IN ('取消', '未付款')
-          AND DATE_FORMAT(o.Order_Date, '%Y-%m') = '$selectedMonth'
-          AND p.Type = '" . $link->real_escape_string($typeFilter) . "'
+        WHERE p.Type = '$escType'
+          AND o.Order_status NOT IN ('取消', '未付款')
+          AND DATE_FORMAT(o.Order_Date, '%Y-%m') = '{$link->real_escape_string($selectedMonth)}'
           $sellerCondition
-        GROUP BY p.Product_ID, p.Product_Name
-        ORDER BY total_sold DESC
+        GROUP BY p.Product_ID
+        ORDER BY qty_sold DESC
     ";
-    $resDetails = $link->query($sqlDetails);
-    while ($row = $resDetails->fetch_assoc()) {
-        $productDetails[] = $row;
+    $resDetail = $link->query($sqlDetail);
+    while ($row = $resDetail->fetch_assoc()) {
+        $detailedData[] = $row;
     }
 }
 ?>
@@ -97,184 +94,114 @@ if ($typeFilter && in_array($typeFilter, $allTypes)) {
 <head>
 <meta charset="UTF-8">
 <title>銷售報表</title>
-<link rel="stylesheet" href="CSS/report.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="CSS/original_table.css"> <!-- 換成你原本的CSS檔案 -->
 <style>
-/* 簡潔表格 */
-table {
-    border-collapse: collapse;
-    width: 100%;
-    margin-top: 20px;
-}
-table th, table td {
-    border: 1px solid #ccc;
-    padding: 6px 10px;
-    text-align: center;
-}
-table th {
-    background-color: #f4f4f4;
-}
-a.type-link {
-    color: #007bff;
-    text-decoration: none;
-}
-a.type-link:hover {
+  #salesChart {
+    max-width: 700px;
+    max-height: 300px;
+  }
+  .clickable {
+    cursor: pointer;
+    color: blue;
     text-decoration: underline;
-}
-.back-btn {
-    display: inline-block;
-    margin: 20px 0;
-    padding: 6px 14px;
-    background-color: #007bff;
-    color: white;
-    text-decoration: none;
-    border-radius: 3px;
-    font-weight: 600;
-}
-.back-btn:hover {
-    background-color: #0056b3;
-}
-/* 簡化Chart大小 */
-#salesChart {
-    max-width: 600px;
-    height: 300px !important;
-    margin-top: 20px;
-}
+  }
 </style>
 </head>
 <body>
 <main>
     <h2>銷售報表（<?php echo htmlspecialchars($selectedMonth); ?>）</h2>
-    <form id="filterForm" method="get" action="monthly_report.php">
-        <label for="month">選擇月份：</label>
-        <select id="month" name="month" onchange="document.getElementById('filterForm').submit()">
-            <?php foreach ($months as $m): ?>
-                <option value="<?php echo $m; ?>" <?php if ($m === $selectedMonth) echo 'selected'; ?>>
-                    <?php echo $m; ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
 
-        <label for="type">選擇商品類別：</label>
-        <select id="type" name="type" onchange="document.getElementById('filterForm').submit()">
-            <option value="" <?php if ($typeFilter === '') echo 'selected'; ?>>全部類別</option>
-            <?php foreach ($allTypes as $t): ?>
-                <option value="<?php echo $t; ?>" <?php if ($typeFilter === $t) echo 'selected'; ?>>
-                    <?php echo $t; ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
+    <!-- 篩選月份 -->
+    <form method="get" id="filterForm" action="monthly_report.php">
+        <label for="month">月份：
+            <select name="month" id="month" onchange="this.form.submit()">
+                <?php foreach ($months as $m): ?>
+                <option value="<?= $m ?>" <?= $m === $selectedMonth ? 'selected' : '' ?>><?= $m ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
     </form>
 
+    <!-- 銷售數量條形圖 -->
     <canvas id="salesChart"></canvas>
 
+    <!-- 商品類別銷售量表 -->
     <table>
         <thead>
             <tr>
                 <th>商品類別</th>
                 <th>銷售數量</th>
-                <th>銷售金額 (元)</th>
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($data as $type => $info): ?>
-                <tr>
-                    <td>
-                        <?php if (!$typeFilter): ?>
-                            <a href="?month=<?php echo $selectedMonth; ?>&type=<?php echo urlencode($type); ?>" class="type-link">
-                                <?php echo htmlspecialchars($type); ?>
-                            </a>
-                        <?php else: ?>
-                            <?php echo htmlspecialchars($type); ?>
-                        <?php endif; ?>
-                    </td>
-                    <td><?php echo (int)$info['total_sold']; ?></td>
-                    <td><?php echo number_format($info['total_amount'], 0); ?></td>
-                </tr>
+            <?php foreach ($data as $type => $qty): ?>
+            <tr>
+                <td>
+                    <a href="?month=<?= htmlspecialchars($selectedMonth) ?>&detail_type=<?= urlencode($type) ?>" class="clickable">
+                        <?= htmlspecialchars($type) ?>
+                    </a>
+                </td>
+                <td><?= $qty ?></td>
+            </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
 
-    <?php if ($typeFilter && in_array($typeFilter, $allTypes)): ?>
-        <h3>類別 "<?php echo htmlspecialchars($typeFilter); ?>" 產品銷售明細</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>產品ID</th>
-                    <th>產品名稱</th>
-                    <th>銷售數量</th>
-                    <th>銷售金額 (元)</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (count($productDetails) === 0): ?>
-                    <tr><td colspan="4">無銷售資料</td></tr>
-                <?php else: ?>
-                    <?php foreach ($productDetails as $prod): ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($prod['Product_ID']); ?></td>
-                            <td><?php echo htmlspecialchars($prod['Product_Name']); ?></td>
-                            <td><?php echo (int)$prod['total_sold']; ?></td>
-                            <td><?php echo number_format($prod['total_amount'], 0); ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </tbody>
-        </table>
+    <!-- 詳細商品銷售明細 -->
+    <?php if ($detailedType): ?>
+    <h3>「<?= htmlspecialchars($detailedType) ?>」類別詳細銷售量</h3>
+    <?php if ($detailedData): ?>
+    <table>
+        <thead>
+            <tr><th>商品名稱</th><th>銷售數量</th></tr>
+        </thead>
+        <tbody>
+        <?php foreach ($detailedData as $item): ?>
+            <tr>
+                <td><?= htmlspecialchars($item['Product_Name']) ?></td>
+                <td><?= (int)$item['qty_sold'] ?></td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
+    <?php else: ?>
+        <p>該類別無銷售資料。</p>
+    <?php endif; ?>
     <?php endif; ?>
 
-    <a href="<?php echo ($role === 'admin') ? 'index.php' : 'Seller_index.php'; ?>" class="back-btn">回首頁</a>
+    <p><a href="<?php echo ($role === 'admin') ? 'index.php' : 'Seller_index.php'; ?>">回首頁</a></p>
 
 <script>
 const ctx = document.getElementById('salesChart').getContext('2d');
 const salesChart = new Chart(ctx, {
     type: 'bar',
     data: {
-        labels: [<?php echo json_encode($selectedMonth); ?>],
-        datasets: <?php
-            $datasets = [];
-            foreach ($data as $type => $info) {
-                $color = match(trim($type)) {
-                    '家具' => '#FFCC00',
-                    '家電' => '#00CC66',
-                    '衣物' => '#FF8800',
-                    '3C' => '#3498db',
-                    '書' => '#2ecc71',
-                    '玩具' => '#33CCCC',
-                    '運動用品' => '#66CC66',
-                    default => '#AAA'
-                };
-                $datasets[] = [
-                    'label' => trim($type),
-                    'data' => [(int)$info['total_sold']],
-                    'backgroundColor' => $color
-                ];
-            }
-            echo json_encode($datasets, JSON_UNESCAPED_UNICODE);
-        ?>
+        labels: <?php echo json_encode(array_keys($data), JSON_UNESCAPED_UNICODE); ?>,
+        datasets: [{
+            label: '銷售數量',
+            data: <?php echo json_encode(array_values($data)); ?>,
+            backgroundColor: '#3498db',
+            barPercentage: 0.6,
+            categoryPercentage: 0.7,
+        }]
     },
     options: {
         responsive: true,
         plugins: {
             legend: { position: 'top' },
-            title: {
-                display: true,
-                text: '銷售數量條形圖'
-            }
+            title: { display: true, text: '<?php echo htmlspecialchars($selectedMonth); ?> 銷售數量柱狀圖' }
         },
         scales: {
             y: {
                 beginAtZero: true,
-                precision: 0,
-                ticks: { stepSize: 1 }
+                ticks: { stepSize: 1 },
+                title: { display: true, text: '銷售數量' }
             },
             x: {
-                stacked: false,
                 ticks: { font: { size: 12 } }
             }
-        },
-        categoryPercentage: 0.6,
-        barPercentage: 0.8
+        }
     }
 });
 </script>
