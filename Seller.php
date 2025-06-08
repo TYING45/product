@@ -6,7 +6,7 @@ if (!isset($_SESSION['username'])) {
 }
 include("sql_php.php");
 
-$pageRow_records = 3; // 每頁顯示 10 筆資料
+$pageRow_records = 10; // 每頁顯示 10 筆資料
 $num_pages = isset($_GET['page']) ? intval($_GET['page']) : 1; // 取得目前頁數
 $startRow_records = ($num_pages - 1) * $pageRow_records; // 計算起始位置
 
