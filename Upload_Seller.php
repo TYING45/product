@@ -29,7 +29,7 @@ if (isset($_POST['output'])) {
 
             while (($row = fgetcsv($csvFile)) !== FALSE) {
                 list($Seller_ID, $Seller_name, $Company, $username, $password,
-                     $Phone, $Email, $Address) = $row;
+                     $Phone, $Email, $Address,$Seller_introduction) = $row;
 
                 $stmt = $link->prepare("SELECT * FROM `seller` WHERE `Seller_ID` = ?");
                 $stmt->bind_param("s", $Seller_ID);
@@ -38,11 +38,11 @@ if (isset($_POST['output'])) {
                 $stmt->close();
 
                 if ($result->num_rows > 0) {
-                    $stmt = $link->prepare("UPDATE `seller` SET `Seller_name`=?, `Company`=?, `username`=?, `password`=?, `Email`=? , `Phone`=?, `Address`=? WHERE `Seller_ID`=?");
-                    $stmt->bind_param("ssssssss", $Seller_name, $Company, $username, $password, $Email, $Phone, $Address, $Seller_ID);
+                    $stmt = $link->prepare("UPDATE `seller` SET `Seller_name`=?, `Company`=?, `username`=?, `password`=?, `Email`=? , `Phone`=?, `Address`=?,`Seller_introduction`=? WHERE `Seller_ID`=?");
+                    $stmt->bind_param("sssssssss", $Seller_name, $Company, $username, $password, $Email, $Phone, $Address,$Seller_introduction, $Seller_ID);
                 } else {
-                    $stmt = $link->prepare("INSERT INTO `seller`(`Seller_ID`, `Seller_name`, `Company`, `username`, `password`, `Email` ,`Phone`, `Address`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-                    $stmt->bind_param("ssssssss", $Seller_ID, $Seller_name, $Company, $username, $password, $Email, $Phone, $Address);
+                    $stmt = $link->prepare("INSERT INTO `seller`(`Seller_ID`, `Seller_name`, `Company`, `username`, `password`, `Email` ,`Phone`, `Address`,`Seller_introduction`) VALUES (?, ?, ?, ?, ?, ?, ?,?, ?)");
+                    $stmt->bind_param("sssssssss", $Seller_ID, $Seller_name, $Company, $username, $password, $Email, $Phone, $Address,$Seller_introduction);
                 }
                 $stmt->execute();
                 $stmt->close();
