@@ -26,10 +26,6 @@ if (!in_array($selectedMonth, $months)) {
     $selectedMonth = $currentMonth;
 }
 
-// 商品類別清單
-$allTypes = ['家具','家電', '衣物','3C', '書','玩具','運動用品','其他'];
-$typeFilter = isset($_GET['type']) ? $_GET['type'] : '';
-
 // SQL 條件建構
 $typeCondition = '';
 if ($typeFilter && in_array($typeFilter, $allTypes)) {
@@ -148,15 +144,6 @@ while ($row = $resultDetail->fetch_assoc()) {
             <?php endforeach; ?>
         </select>
 
-        <label for="type">選擇商品類別：</label>
-        <select id="type" name="type" onchange="document.getElementById('filterForm').submit()">
-            <option value="" <?php if ($typeFilter === '') echo 'selected'; ?>>全部類別</option>
-            <?php foreach ($allTypes as $t): ?>
-                <option value="<?php echo $t; ?>" <?php if ($typeFilter === $t) echo 'selected'; ?>>
-                    <?php echo $t; ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
     </form>
 
     <canvas id="salesChart" style="max-width: 700px; margin-top: 30px;"></canvas>
