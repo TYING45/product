@@ -174,16 +174,6 @@ while ($row = $resultDetail->fetch_assoc()) {
             </option>
         <?php endforeach; ?>
     </select>
-
-    <label for="type">類別：</label>
-    <select id="type" name="type" onchange="this.form.submit()">
-        <option value="" <?php if ($typeFilter === '') echo 'selected'; ?>>全部</option>
-        <?php foreach ($allTypes as $t): ?>
-            <option value="<?php echo $t; ?>" <?php if ($typeFilter === $t) echo 'selected'; ?>>
-                <?php echo $t; ?>
-            </option>
-        <?php endforeach; ?>
-    </select>
 </form>
 
 <canvas id="salesChart" style="max-width:700px; margin: 0 auto 30px auto; display:block;"></canvas>
