@@ -14,8 +14,8 @@ if (isset($_POST["action"]) && $_POST["action"] == "add") {
         $new_id = "S" . str_pad($new_num, 3, "0", STR_PAD_LEFT);  // 例如 S003
 
 
-        $stmt = $link->prepare("INSERT INTO `seller`(`Seller_ID`, `Seller_name`, `username`, `password`, `phone`, `email`, `Address`) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("sssssss", $new_id, $_POST["name"], $_POST["username"], $_POST["password"], $_POST["phone"], $_POST["email"], $_POST["address"]);
+        $stmt = $link->prepare("INSERT INTO `seller`(`Seller_ID`, `Seller_name`,`Company`, `username`, `password`, `phone`, `email`, `Address`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("sssssss", $new_id, $_POST["Seller_name"], $_POST["Company"], $_POST["username"], $_POST["password"], $_POST["phone"], $_POST["email"], $_POST["address"]);
 
         if ($stmt->execute()) {
             header("Location: login.php");
@@ -43,7 +43,8 @@ if (isset($_POST["action"]) && $_POST["action"] == "add") {
     <h1 align="center">新增用戶資料</h1>
     <form action="" method="post">
         <table align="center">
-            <tr><td>姓名:</td><td><input type="text" name="name" required></td></tr>
+            <tr><td>姓名:</td><td><input type="text" name="Seller_name" required></td></tr>
+            <tr><td>公司:</td><td><input type="text" name="Company" required></td></tr>
             <tr><td>電話:</td><td><input type="text" name="phone" required></td></tr>
             <tr><td>Email:</td><td><input type="email" name="email" required></td></tr>
             <tr><td>帳號:</td><td><input type="text" name="username" required></td></tr>
