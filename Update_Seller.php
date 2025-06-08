@@ -4,13 +4,13 @@ $upload_dir = "uploads/";
 
 if (isset($_POST["action"]) && $_POST["action"] == "update") {
     if (!empty($_POST["Seller_ID"]) && !empty($_POST["username"]) && !empty($_POST["password"]) &&
-    !empty($_POST["Email"]) && !empty($_POST["Phone"]) && !empty($_POST["Seller_name"]) && !empty($_POST["Company"])) {
-        $sqli_query = "UPDATE `seller` SET `Seller_name`=?,`Company`= ?, `username`=?, `password`=?, `Phone`=?, `Email`=?, `Address`=? WHERE `Seller_ID`=?";
+    !empty($_POST["Email"]) && !empty($_POST["Phone"]) && !empty($_POST["Seller_name"]) && !empty($_POST["Company"]) &&!empty("Seller_introduction")) {
+        $sqli_query = "UPDATE `seller` SET `Seller_name`=?,`Company`= ?, `username`=?, `password`=?, `Phone`=?, `Email`=?, `Address`=?,Seller_introduction=? WHERE `Seller_ID`=?";
         
         $stmt = $link->prepare($sqli_query);
         if ($stmt) {
-            $stmt->bind_param("ssssssss", $_POST["Seller_name"],$_POST["Company"], $_POST["username"], $_POST["password"],
-                $_POST["Phone"], $_POST["Email"], $_POST["Address"], $_POST["Seller_ID"]);
+            $stmt->bind_param("sssssssss", $_POST["Seller_name"],$_POST["Company"], $_POST["username"], $_POST["password"],
+                $_POST["Phone"], $_POST["Email"], $_POST["Address"],$_POST["Seller_introduction]", $_POST["Seller_ID"]);
             $stmt->execute();
             $stmt->close();
         }   
@@ -26,11 +26,11 @@ if (isset($_POST["action"]) && $_POST["action"] == "update") {
 if (isset($_GET["id"])) {
     $Seller_ID = $_GET["id"];
 
-    $sql_select = "SELECT Seller_name, Company, username, password, Phone, Email, Address FROM seller WHERE Seller_ID = ?";
+    $sql_select = "SELECT Seller_name, Company, username, password, Phone, Email, Address,Seller_introduction FROM seller WHERE Seller_ID = ?";
     $stmt = $link->prepare($sql_select);
     $stmt->bind_param("s", $Seller_ID);
     $stmt->execute();
-    $stmt->bind_result($Seller_name,$Company, $username, $password, $Phone, $Email, $Address);
+    $stmt->bind_result($Seller_name,$Company, $username, $password, $Phone, $Email, $Address,$Seller_introduction);
     if ($stmt->fetch()) {
         $stmt->close();
     }
@@ -74,6 +74,8 @@ if (isset($_GET["id"])) {
     <br>
     <label>地址:</label><br>
     <textarea name="Address" rows="2" cols="100"><?php echo $Address; ?></textarea><br> 
+    <label>賣家介紹</label> 
+    <textarea name="Seller_introduction" rows="3" cols="100"><?php echo $Seller_introduction; ?></textarea><br> 
     <input type="button" value="取消" onclick="location.href='Seller.php'">    
     <button type="submit">更新</button>
 </form>
