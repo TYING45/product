@@ -1,37 +1,76 @@
 <?php  
-session_start();
-include("sql_php.php");  
+require 'vendor/autoload.php';
+include("sql_php.php");
 
-// 設定連線編碼，避免編碼錯誤
-$link->set_charset("utf8mb4");
+use Dotenv\Dotenv;
 
-// 安全處理檔名
+// 載入 .env
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
 function sanitize_filename($filename) {
     return preg_replace('/[^a-zA-Z0-9_\.-]/', '_', strtolower($filename));
 }
 
-// 圖片處理（下載網址或移動本地檔案）
 function handle_image($imageField) {
     $uploadDir = "uploads/";
     $csvImageDir = "uploads_csv/";
 
+    // 如果是網址
     if (filter_var($imageField, FILTER_VALIDATE_URL)) {
-        $imageData = @file_get_contents($imageField);
-        if ($imageData === false) return ''; // 下載失敗回傳空字串
-        $imageName = basename(parse_url($imageField, PHP_URL_PATH));
-        $imageName = sanitize_filename($imageName);
-        file_put_contents($uploadDir . $imageName, $imageData);
+        $imageName = sanitize_filename(basename(parse_url($imageField, PHP_URL_PATH)));
+        $savePath = $uploadDir . $imageName;
+
+        if (!file_exists($savePath)) {
+            $imageData = file_get_contents($imageField);
+            file_put_contents($savePath, $imageData);
+        }
     } else {
+        // 是本地檔名，從 uploads_csv/ 移動到 uploads/
         $imageName = sanitize_filename($imageField);
         $srcPath = $csvImageDir . $imageName;
         $destPath = $uploadDir . $imageName;
-        if (file_exists($srcPath)) {
+
+        if (file_exists($srcPath) && !file_exists($destPath)) {
             copy($srcPath, $destPath);
-        } else {
-            return ''; // 本地檔案不存在，回傳空字串
         }
     }
+
     return $imageName;
+}
+
+function upload_to_github($filename, $content) {
+    $token = $_ENV['GITHUB_TOKEN'];
+    $owner = $_ENV['GITHUB_REPO_OWNER']?? 'TYING45';
+    $repo = $_ENV['GITHUB_REPO_NAME']?? 'product';
+    $branch = $_ENV['GITHUB_BRANCH'] ?? 'main';
+    $path = "uploads/seller/" . $filename;
+
+    $uploadUrl = "https://api.github.com/repos/$owner/$repo/contents/$path";
+
+    $data = [
+        "message" => "Upload CSV $filename",
+        "content" => base64_encode($content),
+        "branch" => $branch
+    ];
+
+    $ch = curl_init($uploadUrl);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        "Authorization: token $token",
+        "User-Agent: $owner",
+        "Content-Type: application/json"
+    ]);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+
+    $result = curl_exec($ch);
+    $httpStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($httpStatus < 200 || $httpStatus >= 300) {
+        error_log("GitHub Upload Failed: HTTP $httpStatus\n$result");
+    }
 }
 
 if (isset($_POST['output'])) {
@@ -44,36 +83,30 @@ if (isset($_POST['output'])) {
 
     if (!empty($_FILES["fileUpload"]["name"]) && in_array($_FILES["fileUpload"]["type"], $csvMimes)) {
         if (is_uploaded_file($_FILES["fileUpload"]["tmp_name"])) {
+            $csvFilename = basename($_FILES["fileUpload"]["name"]);
+            $csvContent = file_get_contents($_FILES["fileUpload"]["tmp_name"]);
+
             $csvFile = fopen($_FILES["fileUpload"]["tmp_name"], "r");
 
-            // 跳過前兩行：標題與說明
-            fgetcsv($csvFile);
-            fgetcsv($csvFile);
+            fgetcsv($csvFile); // 跳過第一行（標題）
+            fgetcsv($csvFile); // 跳過第二行（說明）
 
-            $lineNumber = 2;
-            while (($row = fgetcsv($csvFile)) !== FALSE) {
-                $lineNumber++;
-                // 確保欄位數量足夠 (至少9欄)
-                if (count($row) < 9) {
-                    error_log("第{$lineNumber}行資料欄位不足，跳過");
-                    continue;
-                }
-
-                // 轉UTF-8且trim
-                $Product_ID = mb_convert_encoding(trim($row[0]), 'UTF-8', 'auto');
-                $Seller_ID = mb_convert_encoding(trim($row[1]), 'UTF-8', 'auto');
-                $Product_name = mb_convert_encoding(trim($row[2]), 'UTF-8', 'auto');
-                $Type = mb_convert_encoding(trim($row[3]), 'UTF-8', 'auto');
-                $price = intval(trim($row[4]));
-                $Product_introduction = mb_convert_encoding(trim($row[5]), 'UTF-8', 'auto');
-                $quantity = intval(trim($row[6]));
-                $Image = mb_convert_encoding(trim($row[7]), 'UTF-8', 'auto');
-                $Remark = mb_convert_encoding(trim($row[8]), 'UTF-8', 'auto');
+            while (($row_result = fgetcsv($csvFile)) !== FALSE) {
+                $Product_ID = $row_result[0];
+                $Seller_ID = $row_result[1];
+                $Product_name = $row_result[2];
+                $Type = $row_result[3]; 
+                $quantity = intval($row_result[4]);
+                $Product_introduction = $row_result[5];
+                $price = intval($row_result[6]);
+                $Image = $row_result[7];
+                $Remark = $row_result[8];
+                $Sell_quantity = $row_result[9];
 
                 $imageFilename = handle_image($Image);
 
-                // 查詢是否已存在該 Product_ID
-                $prevQuery = "SELECT 1 FROM `product` WHERE `Product_ID` = ?";
+                // 檢查是否已存在
+                $prevQuery = "SELECT * FROM `product` WHERE `Product_ID` = ?";
                 $stmt = $link->prepare($prevQuery);
                 $stmt->bind_param("s", $Product_ID);
                 $stmt->execute();
@@ -82,43 +115,38 @@ if (isset($_POST['output'])) {
 
                 if ($prevResult->num_rows > 0) {
                     // 更新
-                    $sql = "UPDATE `product` SET 
-                            Product_name=?, Seller_ID=?, Type=?, price=?, Product_introduction=?, quantity=?, Image=?, Remark=?,Sell_quantity=?
+                    $sql = "UPDATE `product` 
+                            SET Product_name=?, Seller_ID=?, quantity=?, Product_introduction=?, price=?, Image=?, Remark=?, Type=?, Sell_quantity=? 
                             WHERE Product_ID=?";
                     $stmt = $link->prepare($sql);
-                    $stmt->bind_param(
-                        "sssssisisss", 
-                        $Product_name, $Seller_ID, $Type, $price, $Product_introduction, 
-                        $quantity, $imageFilename, $Remark, $Product_ID
-                    );
+                    $stmt->bind_param("sssisissis", $Product_name, $Seller_ID, $quantity, $Product_introduction, $price, $imageFilename, $Remark, $Type, $Sell_quantity, $Product_ID);
                     $stmt->execute();
                     $stmt->close();
                 } else {
                     // 新增
                     $sql = "INSERT INTO `product` 
-                            (Product_ID, Seller_ID, Product_name, Type, price, Product_introduction, quantity, Image, Remark,Sell_quantity) 
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?)";
+                            (`Product_ID`, `Seller_ID`, `Product_name`, `Type`, `quantity`, `Product_introduction`, `price`, `Image`, `Remark`, `Sell_quantity`) 
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                     $stmt = $link->prepare($sql);
-                    $stmt->bind_param(
-                        "ssssisisss", 
-                        $Product_ID, $Seller_ID, $Product_name, $Type, $price, 
-                        $Product_introduction, $quantity, $imageFilename, $Remark,$Sell_quantity
-                    );
+                    $stmt->bind_param("ssssisissi", $Product_ID, $Seller_ID, $Product_name, $Type, $quantity, $Product_introduction, $price, $imageFilename, $Remark, $Sell_quantity);
                     $stmt->execute();
                     $stmt->close();
                 }
             }
 
             fclose($csvFile);
-            error_log("資料處理完成。");
+
+            // 上傳到 GitHub
+            upload_to_github($csvFilename, $csvContent);
+
         } else {
             die("檔案上傳失敗");
         }
     } else {
         die("請上傳 CSV 檔案");
     }
-
-    header("Location: Seller_Product.php");
-    exit();
 }
+
+header("Location: Seller_Product.php");
+exit();
 ?>
