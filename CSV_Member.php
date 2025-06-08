@@ -18,7 +18,7 @@ if ($query->num_rows > 0) {
     $fp = fopen('php://output', 'w');
 
     // 輸出欄位名稱
-    $fields = ['Member_ID', 'Member_name','password', 'Email', 'Phone', 'Address'];
+   $fields = ['Member_ID', 'Member_name', 'password', 'Email', 'Phone', 'Address'];
     $fields = array_map(fn($field) => mb_convert_encoding($field, "UTF-8", "auto"), $fields);
     fputcsv($fp, $fields, $delimiter);
 
