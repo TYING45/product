@@ -187,10 +187,10 @@ $result = $stmt->get_result();
         </select>
         <select name="payment_status">
             <option value="">全部付款狀態</option>
-            <option value="未付款" <?= $payment_status === '尚未付款' ? 'selected' : '' ?>>尚未付款</option>
+            <option value="尚未付款" <?= $payment_status === '尚未付款' ? 'selected' : '' ?>>尚未付款</option>
             <option value="已付款" <?= $payment_status === '已付款' ? 'selected' : '' ?>>已付款</option>
         </select>
-
+        <select name="order_status">
         <option value="">全部訂單狀態</option>
             <option value="未處理" <?= $order_status === '未處理' ? 'selected' : '' ?>>未處理</option>
             <option value="訂單處理中" <?= $order_status === '訂單處理中' ? 'selected' : '' ?>>訂單處理中</option>
@@ -220,7 +220,7 @@ $result = $stmt->get_result();
                 <tr>
                     <td><?= htmlspecialchars($order['Order_ID']) ?></td>
                     <td><?= htmlspecialchars($order['Order_Date']) ?></td>
-                    <td><?= htmlspecialchars($order['Payment_status'] ?? '') ?></td>
+                    <td><?= htmlspecialchars($order['Payment_status'] ?? '尚未付款') ?></td>
                     <td><?= htmlspecialchars($order['Order_status'] ?? '') ?></td>
                     <td><?= htmlspecialchars(number_format(($order['total_price'] ?? 0) + ($order['shipping_fee'] ?? 0), 2)) ?></td>
                     <td><a href="UpdateSeller_Order.php?Order_ID=<?= urlencode($order['Order_ID']) ?>">查看</a></td>
