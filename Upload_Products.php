@@ -8,17 +8,18 @@ use Dotenv\Dotenv;
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-function sanitize_filename($filename) {
-    return preg_replace('/[^a-zA-Z0-9_\.-]/', '_', strtolower($filename));
+// 保留檔案原名，僅移除潛在危險字元（例如換行符）
+function clean_filename($filename) {
+    return preg_replace('/[\x00-\x1F\x7F]/', '', $filename); 
 }
 
+// 下載或搬移圖片
 function handle_image($imageField) {
     $uploadDir = "uploads/";
     $csvImageDir = "uploads_csv/";
 
-    // 如果是網址
     if (filter_var($imageField, FILTER_VALIDATE_URL)) {
-        $imageName = sanitize_filename(basename(parse_url($imageField, PHP_URL_PATH)));
+        $imageName = clean_filename(basename(parse_url($imageField, PHP_URL_PATH)));
         $savePath = $uploadDir . $imageName;
 
         if (!file_exists($savePath)) {
@@ -26,8 +27,7 @@ function handle_image($imageField) {
             file_put_contents($savePath, $imageData);
         }
     } else {
-        // 是本地檔名，從 uploads_csv/ 移動到 uploads/
-        $imageName = sanitize_filename($imageField);
+        $imageName = clean_filename($imageField);
         $srcPath = $csvImageDir . $imageName;
         $destPath = $uploadDir . $imageName;
 
@@ -39,20 +39,53 @@ function handle_image($imageField) {
     return $imageName;
 }
 
+// 查詢 GitHub 上是否已有該檔案
+function get_file_sha_from_github($path) {
+    $token = $_ENV['GITHUB_TOKEN'];
+    $owner = $_ENV['GITHUB_REPO_OWNER'] ?? 'TYING45';
+    $repo = $_ENV['GITHUB_REPO_NAME'] ?? 'product';
+    $branch = $_ENV['GITHUB_BRANCH'] ?? 'main';
+
+    $url = "https://api.github.com/repos/$owner/$repo/contents/" . rawurlencode($path) . "?ref=$branch";
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        "Authorization: token $token",
+        "User-Agent: $owner"
+    ]);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    $result = curl_exec($ch);
+    $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($status == 200) {
+        $json = json_decode($result, true);
+        return $json['sha'] ?? null;
+    }
+    return null;
+}
+
+// 上傳 CSV 到 GitHub
 function upload_to_github($filename, $content) {
     $token = $_ENV['GITHUB_TOKEN'];
-    $owner = $_ENV['GITHUB_REPO_OWNER']?? 'TYING45';
-    $repo = $_ENV['GITHUB_REPO_NAME']?? 'product';
+    $owner = $_ENV['GITHUB_REPO_OWNER'] ?? 'TYING45';
+    $repo = $_ENV['GITHUB_REPO_NAME'] ?? 'product';
     $branch = $_ENV['GITHUB_BRANCH'] ?? 'main';
     $path = "uploads/seller/" . $filename;
 
-    $uploadUrl = "https://api.github.com/repos/$owner/$repo/contents/$path";
+    $sha = get_file_sha_from_github($path);
 
     $data = [
         "message" => "Upload CSV $filename",
         "content" => base64_encode($content),
         "branch" => $branch
     ];
+
+    if ($sha) {
+        $data['sha'] = $sha; // 加上 sha 表示是更新
+    }
+
+    $uploadUrl = "https://api.github.com/repos/$owner/$repo/contents/" . rawurlencode($path);
 
     $ch = curl_init($uploadUrl);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
@@ -73,13 +106,14 @@ function upload_to_github($filename, $content) {
     }
 }
 
+// 主流程
 if (isset($_POST['output'])) {
-    $csvMimes = array(
+    $csvMimes = [
         'text/x-comma-separated-values', 'text/comma-separated-values',
         'application/octet-stream', 'application/vnd.ms-excel', 'application/x-csv',
         'text/x-csv', 'text/csv', 'application/csv', 'application/excel',
         'application/vnd.msexcel', 'text/plain'
-    );
+    ];
 
     if (!empty($_FILES["fileUpload"]["name"]) && in_array($_FILES["fileUpload"]["type"], $csvMimes)) {
         if (is_uploaded_file($_FILES["fileUpload"]["tmp_name"])) {
@@ -105,7 +139,7 @@ if (isset($_POST['output'])) {
 
                 $imageFilename = handle_image($Image);
 
-                // 檢查是否已存在
+                // 檢查是否存在
                 $prevQuery = "SELECT * FROM `product` WHERE `Product_ID` = ?";
                 $stmt = $link->prepare($prevQuery);
                 $stmt->bind_param("s", $Product_ID);
@@ -136,7 +170,7 @@ if (isset($_POST['output'])) {
 
             fclose($csvFile);
 
-            // 上傳到 GitHub
+            // 上傳 CSV 到 GitHub
             upload_to_github($csvFilename, $csvContent);
 
         } else {
