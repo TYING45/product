@@ -15,22 +15,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // 先查訂單主鍵 id 和目前付款方式及繳款狀態
-    $sql_old = "SELECT id, Payment_method, Payment_status FROM ordershop WHERE Order_ID = ?";
+    $sql_old = "SELECT id, Payment_method FROM ordershop WHERE Order_ID = ?";
     $stmt_old = $link->prepare($sql_old);
     $stmt_old->bind_param("s", $Order_ID);
     $stmt_old->execute();
     $result_old = $stmt_old->get_result();
     $order = $result_old->fetch_assoc();
-    $ordershop_id = $order['id'] ?? null;
-    $payment_method = $order['Payment_method'] ?? '';
-    $old_payment_status = $order['Payment_status'] ?? '';
     $stmt_old->close();
 
-    if (!$ordershop_id) {
+    if (!$order) {
         echo "<script>alert('找不到訂單'); history.back();</script>";
         exit;
     }
-    $Payment_status = $_POST['Payment_status'] ?? (($payment_method === 'cc') ? '已繳款' : '尚未繳款');
+
+    $ordershop_id = $order['id'];
+    $payment_method = $order['Payment_method'];
+
+   if ($payment_method === 'cc' || $Order_status === '結案') {
+    $Payment_status = '已繳款';
+    } else {
+    $Payment_status = '尚未繳款';
+    }
 
     // 更新訂單資料
     $sql_update = "UPDATE ordershop SET 
@@ -54,9 +59,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // 如果訂單狀態是「商品退貨」，補回商品庫存，並更新處理狀態
+    // 如果訂單狀態是「商品退貨」，補回商品庫存
     if ($Order_status === '商品退貨') {
-        // 取出此訂單的所有商品及數量
         $sql_items = "SELECT product_id, quantity FROM order_items WHERE order_id = ?";
         $stmt_items = $link->prepare($sql_items);
         $stmt_items->bind_param("i", $ordershop_id);
@@ -67,10 +71,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $product_id = $item['product_id'];
             $quantity = $item['quantity'];
 
-            // 商品退貨：庫存補回
             $sql_update_qty = "UPDATE product SET Sell_quantity = Sell_quantity + ? WHERE id = ?";
             $stmt_qty = $link->prepare($sql_update_qty);
-            $stmt_qty->bind_param("ii", $quantity, $product_id);
+            $stmt_qty->bind_param("is", $quantity, $product_id);
             $stmt_qty->execute();
             $stmt_qty->close();
         }
