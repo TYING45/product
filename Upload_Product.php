@@ -41,8 +41,8 @@ function handle_image($imageField) {
 
 function upload_to_github($filename, $content) {
     $token = $_ENV['GITHUB_TOKEN'];
-    $owner = $_ENV['GITHUB_REPO_OWNER'];
-    $repo = $_ENV['GITHUB_REPO_NAME'];
+    $owner = $_ENV['GITHUB_REPO_OWNER']?? 'TYING45';
+    $repo = $_ENV['GITHUB_REPO_NAME']?? 'product';
     $branch = $_ENV['GITHUB_BRANCH'] ?? 'main';
     $path = "uploads/seller/" . $filename;
 
@@ -119,7 +119,7 @@ if (isset($_POST['output'])) {
                             SET Product_name=?, Seller_ID=?, quantity=?, Product_introduction=?, price=?, Image=?, Remark=?, Type=?, Sell_quantity=? 
                             WHERE Product_ID=?";
                     $stmt = $link->prepare($sql);
-                    $stmt->bind_param("sssisissss", $Product_name, $Seller_ID, $quantity, $Product_introduction, $price, $imageFilename, $Remark, $Type, $Sell_quantity, $Product_ID);
+                    $stmt->bind_param("sssisissis", $Product_name, $Seller_ID, $quantity, $Product_introduction, $price, $imageFilename, $Remark, $Type, $Sell_quantity, $Product_ID);
                     $stmt->execute();
                     $stmt->close();
                 } else {
@@ -128,7 +128,7 @@ if (isset($_POST['output'])) {
                             (`Product_ID`, `Seller_ID`, `Product_name`, `Type`, `quantity`, `Product_introduction`, `price`, `Image`, `Remark`, `Sell_quantity`) 
                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                     $stmt = $link->prepare($sql);
-                    $stmt->bind_param("ssssisisss", $Product_ID, $Seller_ID, $Product_name, $Type, $quantity, $Product_introduction, $price, $imageFilename, $Remark, $Sell_quantity);
+                    $stmt->bind_param("ssssisissi", $Product_ID, $Seller_ID, $Product_name, $Type, $quantity, $Product_introduction, $price, $imageFilename, $Remark, $Sell_quantity);
                     $stmt->execute();
                     $stmt->close();
                 }
