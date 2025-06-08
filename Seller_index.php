@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-// 驗證登入狀態與賣家身份
+// 登入驗證
 if (!isset($_SESSION['username']) || !isset($_SESSION['Seller_ID'])) {
     header("Location: login.php");
     exit();
@@ -9,7 +9,7 @@ if (!isset($_SESSION['username']) || !isset($_SESSION['Seller_ID'])) {
 
 include("sql_php.php");
 
-// 取得特定賣家的資料筆數
+// 根據賣家 ID 撈取資料數量
 function getSellerCount($link, $table, $sellerId) {
     $stmt = $link->prepare("SELECT COUNT(*) AS total FROM `$table` WHERE `Seller_ID` = ?");
     $stmt->bind_param("i", $sellerId);
@@ -23,12 +23,13 @@ $sellerId = $_SESSION['Seller_ID'];
 $productCount = getSellerCount($link, 'product', $sellerId);
 $orderCount = getSellerCount($link, 'ordershop', $sellerId);
 ?>
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>賣家後台</title>
+    <title>賣家後台系統</title>
     <link rel="stylesheet" href="CSS/leftside.css">
     <link rel="stylesheet" href="CSS/topmenu.css">
     <link rel="stylesheet" href="CSS/dashboard.css">
