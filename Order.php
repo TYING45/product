@@ -11,6 +11,8 @@ $search_keyword = $_GET['search'] ?? '';
 $year = $_GET['year'] ?? '';
 $month = $_GET['month'] ?? '';
 $seller_id = $_GET['seller_id'] ?? '';
+$payment_status = $_GET['payment_status'] ?? '';
+$order_status = $_GET['order_status'] ?? '';
 
 $page = max(1, intval($_GET['page'] ?? 1));
 $per_page = 10;
@@ -50,6 +52,20 @@ if ($seller_id !== '') {
     $types .= "i";
 }
 
+// 付款狀態篩選
+if ($payment_status !== '') {
+    $where .= " AND Payment_status = ?";
+    $params[] = $payment_status;
+    $types .= "s";
+}
+
+// 訂單狀態篩選
+if ($order_status !== '') {
+    $where .= " AND Order_status = ?";
+    $params[] = $order_status;
+    $types .= "s";
+}
+
 // 查詢總筆數
 $count_sql = "SELECT COUNT(*) FROM ordershop $where";
 $count_stmt = $link->prepare($count_sql);
@@ -72,7 +88,7 @@ $stmt->bind_param($types, ...$params);
 $stmt->execute();
 $result = $stmt->get_result();
 
-// 取得所有賣家名稱（用於下拉選單）
+// 取得所有賣家名稱
 $sellers = [];
 $seller_result = $link->query("SELECT Seller_ID, Seller_name FROM seller");
 while ($row = $seller_result->fetch_assoc()) {
@@ -99,53 +115,51 @@ while ($row = $seller_result->fetch_assoc()) {
 </div>
 
 <div id="leftside">
-        <ul class="menuleft">
-            <li>
-                <a href="index.php">首頁</a>
-            </li>
-            <li>
-                <a href="#" onclick="toggleMenu(event)">商品管理系統</a>
-                <ul class="menuleft_hide">
-                    <li><a href="Add_Product.php">新增商品</a></li>
-                    <li><a href="Product.php">商品管理</a></li>
-                </ul>
-            </li>
-
-            <li>
-                <a href="#" onclick="toggleMenu(event)">會員管理系統</a>
-                <ul class="menuleft_hide">
-                    <li><a href="Member.php">會員管理</a></li>
-                    <li><a href="Add_Member.php">新增會員</a></li>
-                </ul>
-            </li>
-            <li>
-                <a href="#" onclick="toggleMenu(event)">管理員管理系統</a>
-                <ul class="menuleft_hide">
-                    <li><a href="Permissions.php">管理員管理</a></li>
-                    <li><a href="Add_permissions.php">新增管理員</a></li>
-                </ul>
-            </li>
-            <li>
-                <a href="#" onclick="toggleMenu(event)">賣家管理系統</a>
-                <ul class="menuleft_hide">
-                    <li><a href="Seller.php">賣家管理</a></li>
-                    <li><a href="Add_Seller.php">新增賣家</a></li>
-                </ul>
-            </li>
-            <li><a href="#" onclick="toggleMenu(event)">訂單管理系統</a>
+    <ul class="menuleft">
+        <li><a href="index.php">首頁</a></li>
+        <li>
+            <a href="#" onclick="toggleMenu(event)">商品管理系統</a>
             <ul class="menuleft_hide">
-                    <li><a href="Order.php">訂單資料管理</a></li>
-                </ul>
-            </li>   
-        </ul>
-    </div>
+                <li><a href="Add_Product.php">新增商品</a></li>
+                <li><a href="Product.php">商品管理</a></li>
+            </ul>
+        </li>
+        <li>
+            <a href="#" onclick="toggleMenu(event)">會員管理系統</a>
+            <ul class="menuleft_hide">
+                <li><a href="Member.php">會員管理</a></li>
+                <li><a href="Add_Member.php">新增會員</a></li>
+            </ul>
+        </li>
+        <li>
+            <a href="#" onclick="toggleMenu(event)">管理員管理系統</a>
+            <ul class="menuleft_hide">
+                <li><a href="Permissions.php">管理員管理</a></li>
+                <li><a href="Add_permissions.php">新增管理員</a></li>
+            </ul>
+        </li>
+        <li>
+            <a href="#" onclick="toggleMenu(event)">賣家管理系統</a>
+            <ul class="menuleft_hide">
+                <li><a href="Seller.php">賣家管理</a></li>
+                <li><a href="Add_Seller.php">新增賣家</a></li>
+            </ul>
+        </li>
+        <li>
+            <a href="#" onclick="toggleMenu(event)">訂單管理系統</a>
+            <ul class="menuleft_hide">
+                <li><a href="Order.php">訂單資料管理</a></li>
+            </ul>
+        </li>   
+    </ul>
+</div>
 
 <main class="main">
     <h2>訂單管理（管理員）</h2>
 
     <form method="GET" action="Order.php">
         <input name="search" type="text" placeholder="訂單編號或會員姓名" value="<?= htmlspecialchars($search_keyword) ?>">
-        
+
         <select name="year">
             <option value="">全部年</option>
             <?php
@@ -166,6 +180,30 @@ while ($row = $seller_result->fetch_assoc()) {
                 echo "<option value='$val' $selected>$m 月</option>";
             }
             ?>
+        </select>
+
+        <select name="seller_id">
+            <option value="">全部賣家</option>
+            <?php foreach ($sellers as $seller): ?>
+                <option value="<?= $seller['Seller_ID'] ?>" <?= ($seller_id == $seller['Seller_ID']) ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($seller['Seller_name']) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+
+        <select name="payment_status">
+            <option value="">全部付款狀態</option>
+            <option value="尚未付款" <?= $payment_status === '尚未付款' ? 'selected' : '' ?>>尚未付款</option>
+            <option value="已付款" <?= $payment_status === '已付款' ? 'selected' : '' ?>>已付款</option>
+        </select>
+
+        <select name="order_status">
+            <option value="">全部訂單狀態</option>
+            <option value="未處理" <?= $order_status === '未處理' ? 'selected' : '' ?>>未處理</option>
+            <option value="處理中" <?= $order_status === '處理中' ? 'selected' : '' ?>>處理中</option>
+            <option value="已出貨" <?= $order_status === '已出貨' ? 'selected' : '' ?>>已出貨</option>
+            <option value="已完成" <?= $order_status === '已完成' ? 'selected' : '' ?>>已完成</option>
+            <option value="已取消" <?= $order_status === '已取消' ? 'selected' : '' ?>>已取消</option>
         </select>
 
         <input type="submit" value="查詢">
@@ -205,7 +243,7 @@ while ($row = $seller_result->fetch_assoc()) {
             <?php if ($p == $page): ?>
                 <strong><?= $p ?></strong>
             <?php else: ?>
-                <a href="?page=<?= $p ?>&search=<?= urlencode($search_keyword) ?>&year=<?= $year ?>&month=<?= $month ?>&seller_id=<?= $seller_id ?>"><?= $p ?></a>
+                <a href="?page=<?= $p ?>&search=<?= urlencode($search_keyword) ?>&year=<?= $year ?>&month=<?= $month ?>&seller_id=<?= $seller_id ?>&payment_status=<?= urlencode($payment_status) ?>&order_status=<?= urlencode($order_status) ?>"><?= $p ?></a>
             <?php endif; ?>
             &nbsp;
         <?php endfor; ?>
