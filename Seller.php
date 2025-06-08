@@ -15,7 +15,7 @@ $where = "";
 $params = [];
 $types = "";
 if (isset($_GET["keyword"]) && $_GET["keyword"] != "") {
-    $where = " WHERE `聯絡人` LIKE ? OR `SellerID` LIKE ?";
+    $where = " WHERE `Seller_name` LIKE ? OR `Seller_ID` LIKE ?";
     $keyword = "%" . $_GET["keyword"] . "%";
     $params[] = $keyword;
     $params[] = $keyword;
@@ -82,7 +82,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['id']) && isset($_POST
     <ul class="topmenu">
        <li> <button onclick="toggleSidebar()" class="img-button"></button></li>
        <li></li>
-        <li><a href="#">網頁前端</a></li>
+        <li><a href="https://secondhandshop.netlify.app/">網頁前端</a></li>
         <li><a href="logout.php">登出</a></li>
     </ul>   
 </div>
@@ -92,12 +92,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['id']) && isset($_POST
         <ul class="menuleft">
             <li>
                 <a href="index.php">首頁</a>
-            </li>
-            <li>
-                <a href="#" onclick="toggleMenu(event)">網站管理系統</a>
-                <ul class="menuleft_hide">
-                    <li><a href="#">網站管理</a></li>
-                </ul>
             </li>
             <li>
                 <a href="#" onclick="toggleMenu(event)">商品管理系統</a>
