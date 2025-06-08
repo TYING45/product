@@ -1,17 +1,17 @@
 <?php
 include("sql_php.php");
 
-$id = $_GET['id'] ?? null;
+$order_id = $_GET['Order_ID'] ?? null;
 
-if (!$id) {
-    echo "缺少 id";
+if (!$order_id) {
+    echo "缺少 Order_ID";
     exit;
 }
 
-// 查訂單主資料
-$sql = "SELECT * FROM ordershop WHERE id = ?";
+// 查訂單主資料 (用 Order_ID 查)
+$sql = "SELECT * FROM ordershop WHERE Order_ID = ?";
 $stmt = $link->prepare($sql);
-$stmt->bind_param("i", $id);
+$stmt->bind_param("s", $order_id);
 $stmt->execute();
 $result = $stmt->get_result();
 $order = $result->fetch_assoc();
@@ -21,7 +21,8 @@ if (!$order) {
     exit;
 }
 
-$order_id = $order['Order_ID'];
+// 取得主鍵 id，方便後續使用
+$id = $order['id'];
 
 // 處理更新請求
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -41,9 +42,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         Transport = ?, 
         shipping_zip = ?, 
         Payment_status = ?
-        WHERE id = ?";
+        WHERE Order_ID = ?";
     $stmt = $link->prepare($update_sql);
-    $stmt->bind_param("sssssi", $order_status, $ship_date, $transport, $shipping_zip, $payment_status, $id);
+    $stmt->bind_param("ssssss", $order_status, $ship_date, $transport, $shipping_zip, $payment_status, $order_id);
     $stmt->execute();
 
     // 如果是退貨，補回商品庫存
