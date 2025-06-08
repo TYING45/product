@@ -83,7 +83,8 @@ $orderCount = getCount($link, 'ordershop');
                 <li><a href="Add_Seller.php">新增賣家</a></li>
             </ul>
         </li>
-            <a href="#" onclick="toggleMenu(event)">訂單管理系統 <span class="count-badge"><?php echo $orderCount; ?></span></a>
+        <li>
+            <a href="#" onclick="toggleMenu(event)">訂單管理系統</a>
             <ul class="menuleft_hide">
                 <li><a href="Order.php">訂單資料管理</a></li>
             </ul>
