@@ -8,11 +8,6 @@ use Dotenv\Dotenv;
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
-// 清理檔案名稱：保留檔名但移除危險字元
-function clean_filename($filename) {
-    return preg_replace('/[\x00-\x1F\x7F]/', '', $filename); 
-}
-
 // 處理圖片：下載遠端或搬移本地
 function handle_image($imageField, &$errors, $productId, $productName) {
     $uploadDir = "uploads/";
