@@ -1,27 +1,34 @@
 <?php
 session_start();
-if (!isset($_SESSION['username'])) {
+
+// 驗證登入狀態與賣家身份
+if (!isset($_SESSION['username']) || !isset($_SESSION['Seller_ID'])) {
     header("Location: login.php");
     exit();
 }
+
 include("sql_php.php");
 
-// 撈各區資料數量
-function getCount($link, $table) {
-    $result = $link->query("SELECT COUNT(*) AS total FROM `$table`");
+// 取得特定賣家的資料筆數
+function getSellerCount($link, $table, $sellerId) {
+    $stmt = $link->prepare("SELECT COUNT(*) AS total FROM `$table` WHERE `Seller_ID` = ?");
+    $stmt->bind_param("i", $sellerId);
+    $stmt->execute();
+    $result = $stmt->get_result();
     $row = $result->fetch_assoc();
     return $row['total'];
 }
 
-$productCount = getCount($link, 'product');
-$orderCount = getCount($link, 'ordershop');
+$sellerId = $_SESSION['Seller_ID'];
+$productCount = getSellerCount($link, 'product', $sellerId);
+$orderCount = getSellerCount($link, 'ordershop', $sellerId);
 ?>
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>管理員系統</title>
+    <title>賣家後台</title>
     <link rel="stylesheet" href="CSS/leftside.css">
     <link rel="stylesheet" href="CSS/topmenu.css">
     <link rel="stylesheet" href="CSS/dashboard.css">
@@ -38,28 +45,28 @@ $orderCount = getCount($link, 'ordershop');
                 margin-left: 0;
             }
         }
-    .report-button {
-        display: inline-block;
-        padding: 10px 20px;
-        background-color: #3498db;
-        color: white;
-        text-decoration: none;
-        border-radius: 5px;
-        margin-top: 10px;
-        transition: background-color 0.3s ease;
-}
 
-    .report-button:hover {
-        background-color: #2980b9;
-}
+        .report-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
 
+        .report-button:hover {
+            background-color: #2980b9;
+        }
     </style>
 </head>
 <body>
 <div id="top-menu">
     <ul class="topmenu">
-       <li> <button onclick="toggleSidebar()" class="img-button"></button></li>
-       <li></li>
+        <li><button onclick="toggleSidebar()" class="img-button"></button></li>
+        <li></li>
         <li><a href="#">網頁前端</a></li>
         <li><a href="logout.php">登出</a></li>
     </ul>   
@@ -93,7 +100,7 @@ $orderCount = getCount($link, 'ordershop');
 </div>
 
 <main>
-    <h2>後端管理系統</h2>
+    <h2>賣家後台管理系統</h2>
     <div class="dashboard-container">
         <div class="dashboard-card">
             <h3>商品數量</h3>
@@ -109,7 +116,6 @@ $orderCount = getCount($link, 'ordershop');
         </div>
     </div>
 </main>
-
 
 <script src="JS/leftside.js"></script>
 </body>
