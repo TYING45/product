@@ -103,7 +103,7 @@ function keepURL() {
                 </ul>
             </li>
             <li>
-                <a href="#" onclick="toggleMenu(event)">權限管理系統</a>
+                <a href="#" onclick="toggleMenu(event)">管理員管理系統</a>
                 <ul class="menuleft_hide">
                     <li><a href="Permissions.php">管理員系統</a></li>
                     <li><a href="Add_permissions.php">新增管理員</a></li>
