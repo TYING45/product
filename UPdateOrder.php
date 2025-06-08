@@ -1,17 +1,17 @@
 <?php
 include("sql_php.php");
 
-$order_id = $_GET['Order_ID'] ?? null;
+$order_display_id = $_GET['Order_ID'] ?? null;
 
-if (!$order_id) {
+if (!$order_display_id) {
     echo "缺少 Order_ID";
     exit;
 }
 
-// 查訂單主資料 (用 Order_ID 查)
+// 查訂單主資料
 $sql = "SELECT * FROM ordershop WHERE Order_ID = ?";
 $stmt = $link->prepare($sql);
-$stmt->bind_param("s", $order_id);
+$stmt->bind_param("s", $order_display_id);
 $stmt->execute();
 $result = $stmt->get_result();
 $order = $result->fetch_assoc();
@@ -21,8 +21,8 @@ if (!$order) {
     exit;
 }
 
-// 取得主鍵 id，方便後續使用
-$id = $order['id'];
+$order_id = $order['Order_ID'];
+$order_pk_id = $order['id']; // 主鍵 id，用於關聯 order_items
 
 // 處理更新請求
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -31,9 +31,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $transport = $_POST['Transport'] ?? '';
     $shipping_zip = $_POST['shipping_zip'] ?? '';
 
-    // 根據付款方式判斷付款狀態
+    // 判斷付款狀態，假設付款方式為 cc 時表示已繳款，cod 表示未繳款
     $payment_method = $order['Payment_method'] ?? '';
-    $payment_status = ($payment_method === 'cc') ? '已繳款' : '未繳款';
+    if ($payment_method === 'cc') {
+        $payment_status = '已繳款';
+    } elseif ($payment_method === 'cod') {
+        $payment_status = '未繳款';
+    } else {
+        $payment_status = $order['Payment_status'] ?? '未繳款';
+    }
 
     // 更新訂單資料
     $update_sql = "UPDATE ordershop SET 
@@ -43,15 +49,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         shipping_zip = ?, 
         Payment_status = ?
         WHERE Order_ID = ?";
-    $stmt = $link->prepare($update_sql);
-    $stmt->bind_param("ssssss", $order_status, $ship_date, $transport, $shipping_zip, $payment_status, $order_id);
-    $stmt->execute();
+    $stmt_update = $link->prepare($update_sql);
+    $stmt_update->bind_param("ssssss", $order_status, $ship_date, $transport, $shipping_zip, $payment_status, $order_id);
+    $stmt_update->execute();
 
     // 如果是退貨，補回商品庫存
     if ($order_status === '商品退貨') {
         $sql_items = "SELECT product_id, quantity FROM order_items WHERE order_id = ?";
         $stmt_items = $link->prepare($sql_items);
-        $stmt_items->bind_param("i", $id);
+        $stmt_items->bind_param("i", $order_pk_id);
         $stmt_items->execute();
         $items_result = $stmt_items->get_result();
 
@@ -60,9 +66,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $quantity = $item['quantity'];
 
             $sql_update_quantity = "UPDATE product SET Sell_quantity = Sell_quantity + ? WHERE id = ?";
-            $stmt_update = $link->prepare($sql_update_quantity);
-            $stmt_update->bind_param("is", $quantity, $product_id);
-            $stmt_update->execute();
+            $stmt_update_quantity = $link->prepare($sql_update_quantity);
+            $stmt_update_quantity->bind_param("ii", $quantity, $product_id);
+            $stmt_update_quantity->execute();
         }
     }
 
