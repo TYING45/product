@@ -47,8 +47,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["action"]) && $_POST["
 </head>
 <body>
 <main>
- <p><b><font size="5">新增會員資料</font></b></p>
- <form method="POST" action="">
+ <h1>新增會員資料</h1>
+<form method="POST" action="">
  <table id = "Add_Member" >
     <tr>
         <th>欄位</th><th>資料</th></tr>
