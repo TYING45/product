@@ -80,10 +80,10 @@ function keepURL() {
                 <li><a href="Member.php">會員管理</a></li>
                 <li><a href="Add_Member.php">新增會員</a></li>
             </ul></li>
-        <li><a href="#" onclick="toggleMenu(event)">權限管理系統</a>
+        <li><a href="#" onclick="toggleMenu(event)">管理員系統</a>
             <ul class="menuleft_hide">
-                <li><a href="Permissions.php">權限管理</a></li>
-                <li><a href="Add_permissions.php">新增權限</a></li>
+                <li><a href="Permissions.php">管理員管理</a></li>
+                <li><a href="Add_permissions.php">新增管理員</a></li>
             </ul></li>
         <li><a href="#" onclick="toggleMenu(event)">賣家管理系統</a>
             <ul class="menuleft_hide">
