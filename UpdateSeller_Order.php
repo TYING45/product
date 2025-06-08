@@ -201,7 +201,7 @@ $total_amount = $order['total_price'] + $shipping_fee; // 全訂單總價，保�
     <br><br>
     <div class="order-container">
         <div class="order-header">訂單管理</div>
-        <form method="post" action="UPdateOrder.php?id=<?= htmlspecialchars($order_display_id) ?>">
+        <form method="post" action="UPdate_Seller_Order.php?id=<?= htmlspecialchars($order_display_id) ?>">
             <table>
                 <tr>
                     <th class="label1">處理狀態</th>
