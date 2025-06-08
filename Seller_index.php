@@ -22,9 +22,9 @@ function getSellerProductCount($link, $sellerId) {
 // 查詢賣家訂單數（distinct 訂單數，從 order_items 表抓產品）
 function getSellerOrderCount($link, $sellerId) {
     $stmt = $link->prepare("
-        SELECT COUNT(DISTINCT o.Order_ID) AS total
+        SELECT COUNT(DISTINCT o.id) AS total
         FROM ordershop o
-        JOIN order_items oi ON o.Order_ID = oi.Order_ID
+        JOIN order_items oi ON o.id = oi.order_id
         JOIN product p ON oi.Product_ID = p.Product_ID
         WHERE p.Seller_ID = ?
     ");
