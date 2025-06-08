@@ -15,7 +15,7 @@ if (isset($_POST["action"]) && $_POST["action"] == "add") {
 
 
         $stmt = $link->prepare("INSERT INTO `seller`(`Seller_ID`, `Seller_name`,`Company`, `username`, `password`, `phone`, `email`, `Address`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("sssssss", $new_id, $_POST["Seller_name"], $_POST["Company"], $_POST["username"], $_POST["password"], $_POST["phone"], $_POST["email"], $_POST["address"]);
+        $stmt->bind_param("ssssssss", $new_id, $_POST["Seller_name"], $_POST["Company"], $_POST["username"], $_POST["password"], $_POST["phone"], $_POST["email"], $_POST["address"]);
 
         if ($stmt->execute()) {
             header("Location: login.php");
