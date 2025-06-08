@@ -21,7 +21,7 @@ if (isset($_GET["id"])) {
     $stmt = $link->prepare($sql_select);
     $stmt->bind_param("s", $_GET["id"]);
     $stmt->execute();
-    $stmt->bind_result($MemberID, $name);
+    $stmt->bind_result($Member_ID, $Member_name);
     $stmt->fetch();
     $stmt->close(); // 關閉查詢
 } else {
@@ -44,11 +44,11 @@ if (isset($_GET["id"])) {
             <tr><th>欄位</th><th>資料</th></tr>
             <tr>
                 <td>會員ID</td>
-                <td><input type="text" name="Member_ID" id="Member_ID" value="<?php echo htmlspecialchars($MemberID); ?>" readonly></td>
+                <td><input type="text" name="Member_ID" id="Member_ID" value="<?php echo htmlspecialchars($Member_ID); ?>" readonly></td>
             </tr>
             <tr>
                 <td>姓名</td>
-                <td><input type="text" name="Member_name" id="Member_name" value="<?php echo htmlspecialchars($name); ?>" readonly></td>
+                <td><input type="text" name="Member_name" id="Member_name" value="<?php echo htmlspecialchars($Member_name); ?>" readonly></td>
             </tr>
             <tr>
                 <td colspan="2" align="center">
