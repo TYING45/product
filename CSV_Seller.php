@@ -15,7 +15,7 @@ if ($query->num_rows > 0) {
     $fp = fopen('php://output', 'w');
 
     // 寫入欄位名稱
-    $fields = ['Seller_ID', 'Seller_name', 'Company','username', 'password', ,'Email' 'Phone','Address'];
+    $fields = ['Seller_ID', 'Seller_name', 'Company','username', 'password', ,'Email' 'Phone','Address','Seller_introduction'];
     fputcsv($fp, $fields, $delimiter);
 
     // 寫入資料
@@ -28,7 +28,8 @@ if ($query->num_rows > 0) {
             $row['password'],
             $row['Email'],
             $row['Phone'],
-            $row['Address']
+            $row['Address'],
+            $row['Seller_introduction']
         ];
         fputcsv($fp, $lineData, $delimiter);
     }
