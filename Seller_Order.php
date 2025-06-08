@@ -11,6 +11,9 @@ if (!$seller_id) {
 $search_keyword = $_GET['search'] ?? '';
 $year = $_GET['year'] ?? '';
 $month = $_GET['month'] ?? '';
+$payment_status = $_GET['payment_status'] ?? '';
+$order_status = $_GET['order_status'] ?? '';
+
 $page = max(1, intval($_GET['page'] ?? 1));
 $items_per_page = 10;
 $offset = ($page - 1) * $items_per_page;
@@ -39,6 +42,16 @@ if ($year !== '') {
 if ($month !== '') {
     $sql_count .= " AND MONTH(o.Order_Date) = ? ";
     $params[] = $month;
+    $types .= "s";
+}
+if ($payment_status !== '') {
+    $sql_count .= " AND o.Payment_status = ? ";
+    $params[] = $payment_status;
+    $types .= "s";
+}
+if ($order_status !== '') {
+    $sql_count .= " AND o.Order_status = ? ";
+    $params[] = $order_status;
     $types .= "s";
 }
 
@@ -75,17 +88,13 @@ if ($month !== '') {
     $params[] = $month;
     $types .= "s";
 }
-
-// 付款狀態篩選
 if ($payment_status !== '') {
-    $where .= " AND Payment_status = ?";
+    $sql .= " AND o.Payment_status = ? ";
     $params[] = $payment_status;
     $types .= "s";
 }
-
-// 訂單狀態篩選
 if ($order_status !== '') {
-    $where .= " AND Order_status = ?";
+    $sql .= " AND o.Order_status = ? ";
     $params[] = $order_status;
     $types .= "s";
 }
