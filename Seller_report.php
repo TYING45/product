@@ -5,45 +5,36 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-include("sql_php.php"); // 請確認此檔案含有 $link MySQL 連線物件
+include("sql_php.php");
 
-// 取得使用者角色與 Seller_ID
 $role = $_SESSION['role'] ?? '';
 $sellerID = $_SESSION['Seller_ID'] ?? null;
 
-// 取得當前月份，格式: YYYY-MM
 $currentMonth = date('Y-m');
-
-// 最近6個月
 $months = [];
 for ($i = 5; $i >= 0; $i--) {
     $months[] = date('Y-m', strtotime("-$i month"));
 }
 
-// 選擇的月份（預設本月）
 $selectedMonth = isset($_GET['month']) ? $_GET['month'] : $currentMonth;
 if (!in_array($selectedMonth, $months)) {
     $selectedMonth = $currentMonth;
 }
 
-// 商品類別清單
 $allTypes = ['家具','家電', '衣物','3C', '書','玩具','運動用品','其他'];
 $typeFilter = isset($_GET['type']) ? $_GET['type'] : '';
 
-// SQL 條件建構
 $typeCondition = '';
 if ($typeFilter && in_array($typeFilter, $allTypes)) {
     $typeCondition = "AND p.Type = '" . $link->real_escape_string($typeFilter) . "'";
 }
 
-// 賣家條件：僅限 seller 看自己的資料
 $sellerCondition = '';
 if ($role === 'seller' && $sellerID !== null) {
     $escapedSellerID = $link->real_escape_string($sellerID);
     $sellerCondition = "AND p.Seller_ID = '$escapedSellerID'";
 }
 
-// 撈分類統計資料（銷售數量 & 金額）
 $sql = "
     SELECT 
         DATE_FORMAT(o.Order_Date, '%Y-%m') AS month,
@@ -63,7 +54,6 @@ $sql = "
 
 $result = $link->query($sql);
 
-// 撈產品明細（分類底下所有產品銷售量、金額）
 $sqlDetail = "
     SELECT 
         p.Type,
@@ -83,7 +73,6 @@ $sqlDetail = "
 
 $resultDetail = $link->query($sqlDetail);
 
-// 初始化資料結構
 $data = [];
 $amountData = [];
 if ($typeFilter && in_array($typeFilter, $allTypes)) {
@@ -96,14 +85,12 @@ if ($typeFilter && in_array($typeFilter, $allTypes)) {
     }
 }
 
-// 分類銷售數量與金額
 while ($row = $result->fetch_assoc()) {
     $cleanType = trim($row['Type']);
     $data[$cleanType] = (int)$row['total_sold'];
     $amountData[$cleanType] = round((float)$row['total_amount'], 2);
 }
 
-// 產品明細陣列
 $productDetails = [];
 while ($row = $resultDetail->fetch_assoc()) {
     $type = trim($row['Type']);
@@ -118,27 +105,169 @@ while ($row = $resultDetail->fetch_assoc()) {
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8" />
-<title>銷售報表</title>
+<title>銷售報表 - 美化版</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    .type-row { cursor: pointer; background-color: #f8f8f8; }
-    .detail-row { background-color: #fdfdfd; }
-    .sub-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-    .sub-table th, .sub-table td { border: 1px solid #ccc; padding: 6px; }
-    form label { margin-right: 10px; }
-    form select { margin-right: 20px; }
-    .back-btn { display: inline-block; margin-top: 20px; padding: 8px 16px; background: #3498db; color: white; text-decoration: none; border-radius: 4px;}
-    .back-btn:hover { background: #2980b9; }
+    /* 基礎 Reset & 字體 */
+    * {
+        box-sizing: border-box;
+    }
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: #f0f2f5;
+        margin: 0; padding: 20px;
+        color: #333;
+    }
+
+    main {
+        max-width: 1100px;
+        margin: 0 auto;
+        background: white;
+        padding: 25px 40px 40px 40px;
+        border-radius: 12px;
+        box-shadow: 0 15px 35px rgba(50, 50, 93, 0.1);
+        user-select: none;
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 30px;
+        font-weight: 700;
+        color: #2c3e50;
+        letter-spacing: 1.2px;
+    }
+
+    form {
+        display: flex;
+        justify-content: center;
+        gap: 25px;
+        margin-bottom: 30px;
+    }
+    form label {
+        font-weight: 600;
+        color: #34495e;
+        align-self: center;
+        min-width: 90px;
+        user-select: text;
+    }
+    form select {
+        padding: 8px 14px;
+        font-size: 15px;
+        border-radius: 8px;
+        border: 1.5px solid #bdc3c7;
+        transition: border-color 0.3s ease;
+        min-width: 150px;
+        cursor: pointer;
+        background-color: #fff;
+    }
+    form select:hover, form select:focus {
+        border-color: #2980b9;
+        outline: none;
+        box-shadow: 0 0 6px #2980b9a0;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 8px;
+        font-size: 15px;
+    }
+    thead tr {
+        background: #2980b9;
+        color: white;
+        font-weight: 700;
+        border-radius: 12px;
+    }
+    thead th {
+        padding: 14px 20px;
+        user-select: none;
+    }
+    tbody tr.type-row {
+        background: linear-gradient(90deg, #6dd5fa, #2980b9);
+        color: white;
+        font-weight: 600;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background 0.35s ease;
+        box-shadow: 0 3px 8px rgb(41 128 185 / 0.3);
+    }
+    tbody tr.type-row:hover {
+        background: linear-gradient(90deg, #2980b9, #6dd5fa);
+        box-shadow: 0 6px 15px rgb(41 128 185 / 0.5);
+    }
+
+    tbody tr.detail-row {
+        background: #f7f9fc;
+        box-shadow: inset 0 0 6px #d7e2f0;
+        border-radius: 10px;
+    }
+
+    tbody tr.detail-row td {
+        padding: 0;
+        border: none;
+    }
+
+    .sub-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 6px;
+    }
+    .sub-table thead tr {
+        background-color: #3498db;
+        color: white;
+        font-weight: 600;
+    }
+    .sub-table th, .sub-table td {
+        padding: 10px 14px;
+        text-align: left;
+    }
+    .sub-table tbody tr {
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 1px 4px rgb(0 0 0 / 0.05);
+        transition: background 0.25s ease;
+    }
+    .sub-table tbody tr:hover {
+        background: #eaf4fb;
+    }
+
+    .back-btn {
+        display: inline-block;
+        margin-top: 35px;
+        padding: 12px 30px;
+        background: #2980b9;
+        color: white;
+        font-weight: 600;
+        font-size: 16px;
+        text-decoration: none;
+        border-radius: 8px;
+        box-shadow: 0 8px 15px rgba(41,128,185,0.3);
+        transition: background 0.3s ease, box-shadow 0.3s ease;
+        user-select: none;
+    }
+    .back-btn:hover {
+        background: #1c5987;
+        box-shadow: 0 12px 20px rgba(28,89,135,0.6);
+    }
+
+    /* Chart 容器美化 */
+    #salesChart {
+        background: white;
+        padding: 15px;
+        border-radius: 12px;
+        box-shadow: 0 15px 25px rgba(41, 128, 185, 0.1);
+        max-width: 720px;
+        margin: 0 auto 40px auto;
+        user-select: none;
+    }
+
 </style>
 </head>
 <body>
 <main>
     <h2>銷售報表（<?php echo htmlspecialchars($selectedMonth); ?>）</h2>
 
-    <form id="filterForm" method="get" action="monthly_report.php">
+    <form id="filterForm" method="get" action="monthly_report.php" aria-label="篩選條件">
         <label for="month">選擇月份：</label>
         <select id="month" name="month" onchange="document.getElementById('filterForm').submit()">
             <?php foreach ($months as $m): ?>
@@ -149,22 +278,26 @@ while ($row = $resultDetail->fetch_assoc()) {
         </select>
     </form>
 
-    <canvas id="salesChart" style="max-width: 700px; margin-top: 30px;"></canvas>
+    <canvas id="salesChart" aria-label="分類銷售數量條形圖" role="img"></canvas>
 
-    <table>
+    <table aria-describedby="salesTableDesc">
+        <caption id="salesTableDesc" style="caption-side: bottom; text-align: center; font-style: italic; padding: 10px 0;">
+            點擊分類列展開該分類下各產品銷售明細
+        </caption>
         <thead>
             <tr>
-                <th>月份</th>
-                <th>商品類別（點擊展開明細）</th>
-                <th>銷售數量</th>
-                <th>銷售金額（元）</th>
+                <th scope="col">月份</th>
+                <th scope="col">商品類別（點擊展開明細）</th>
+                <th scope="col">銷售數量</th>
+                <th scope="col">銷售金額（元）</th>
             </tr>
         </thead>
         <tbody>
             <?php foreach ($data as $type => $quantity): 
                 $detailId = md5($type);
             ?>
-                <tr class="type-row" onclick="toggleDetail('<?php echo $detailId; ?>')">
+                <tr class="type-row" tabindex="0" role="button" aria-expanded="false" aria-controls="detail-<?php echo $detailId; ?>" 
+                    onclick="toggleDetail('<?php echo $detailId; ?>')" onkeypress="if(event.key==='Enter') toggleDetail('<?php echo $detailId; ?>')">
                     <td><?php echo htmlspecialchars($selectedMonth); ?></td>
                     <td><?php echo htmlspecialchars($type); ?></td>
                     <td><?php echo (int)$quantity; ?></td>
@@ -199,70 +332,36 @@ while ($row = $resultDetail->fetch_assoc()) {
         </tbody>
     </table>
 
-    <a href="<?php echo ($role === 'admin') ? 'index.php' : 'Seller_index.php'; ?>" class="back-btn">回首頁</a>
+    <a href="<?php echo ($role === 'admin') ? 'index.php' : 'Seller_index.php'; ?>" class="back-btn" role="link" aria-label="回首頁">回首頁</a>
 
 <script>
 function toggleDetail(id) {
     const row = document.getElementById('detail-' + id);
-    if (row) {
-        row.style.display = (row.style.display === 'none') ? '' : 'none';
+    if (!row) return;
+
+    const isHidden = row.style.display === 'none';
+    row.style.display = isHidden ? '' : 'none';
+
+    // 更新 aria-expanded 狀態
+    const triggerRow = row.previousElementSibling;
+    if (triggerRow) {
+        triggerRow.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
     }
 }
 
-// Chart.js 條形圖 - 顯示各分類銷售數量
 const ctx = document.getElementById('salesChart').getContext('2d');
-const salesChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-        labels: [<?php echo '"' . htmlspecialchars($selectedMonth) . '"'; ?>],
-        datasets: <?php
-            $datasets = [];
-            foreach ($data as $type => $value) {
-                $cleanType = trim($type);
-                $color = match($cleanType) {
-                    '家具' => '#FFFF00',
-                    '家電' => '#00FF00',
-                    '衣物' => '#FF8800',
-                    '3C' => '#3498db',
-                    '書' => '#2ecc71',
-                    '玩具' => '#33FFFF',
-                    '運動用品' => '#66FF66',
-                    default => '#aaa'
-                };
-                $datasets[] = [
-                    'label' => $cleanType,
-                    'data' => [(int)$value],
-                    'backgroundColor' => $color
-                ];
-            }
-            echo json_encode($datasets, JSON_UNESCAPED_UNICODE);
-        ?>,
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: { position: 'top' },
-            title: {
-                display: true,
-                text: '分類銷售數量條形圖'
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                precision: 0,
-                ticks: { stepSize: 1 }
-            },
-            x: {
-                stacked: false,
-                ticks: { font: { size: 14 } }
-            }
-        },
-        categoryPercentage: 0.6,
-        barPercentage: 0.8
-    }
-});
-</script>
-</main>
-</body>
-</html>
+
+const colors = {
+    '家具': '#F1C40F',
+    '家電': '#2ECC71',
+    '衣物': '#E67E22',
+    '3C': '#3498DB',
+    '書': '#9B59B6',
+    '玩具': '#1ABC9C',
+    '運動用品': '#27AE60',
+    '其他': '#95A5A6'
+};
+
+const dataLabels = Object.keys(<?php echo json_encode($data, JSON_UNESCAPED_UNICODE); ?>);
+const dataValues = Object.values(<?php echo json_encode($data, JSON_UNESCAPED_UNICODE); ?>);
+const dataColors = dataLabels.map(label => color
