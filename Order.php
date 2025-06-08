@@ -200,10 +200,11 @@ while ($row = $seller_result->fetch_assoc()) {
         <select name="order_status">
             <option value="">全部訂單狀態</option>
             <option value="未處理" <?= $order_status === '未處理' ? 'selected' : '' ?>>未處理</option>
-            <option value="處理中" <?= $order_status === '處理中' ? 'selected' : '' ?>>處理中</option>
-            <option value="已出貨" <?= $order_status === '已出貨' ? 'selected' : '' ?>>已出貨</option>
-            <option value="已完成" <?= $order_status === '已完成' ? 'selected' : '' ?>>已完成</option>
-            <option value="已取消" <?= $order_status === '已取消' ? 'selected' : '' ?>>已取消</option>
+            <option value="訂單處理中" <?= $order_status === '訂單處理中' ? 'selected' : '' ?>>訂單處理中</option>
+            <option value="商品寄出" <?= $order_status === '商品寄出' ? 'selected' : '' ?>>商品寄出</option>
+            <option value="商品退貨" <?= $order_status === '商品退貨' ? 'selected' : '' ?>>商品退貨</option>
+            <option value="交易取消" <?= $order_status === '交易取消' ? 'selected' : '' ?>>交易取消</option>
+            <option value="結案" <?= $order_status === '結案' ? 'selected' : '' ?>>結案</option>
         </select>
 
         <input type="submit" value="查詢">
