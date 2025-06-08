@@ -1,71 +1,82 @@
 <?php
 include("sql_php.php");
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $Order_ID = $_POST['Order_ID'] ?? $_GET['id'] ?? null;
-    $Order_status = $_POST['Order_status'] ?? '';
-    $Ship_Date = $_POST['Ship_Date'] ?? null;
-    $Transport = $_POST['Transport'] ?? '';
-    $shipping_zip = $_POST['shipping_zip'] ?? '';
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $order_id = $_POST['Order_ID'];
+    $order_status = $_POST['Order_status'];
+    $ship_date = $_POST['Ship_Date'];
+    $transport = $_POST['Transport'];
+    $shipping_zip = $_POST['shipping_zip'];
+    $payment_status = $_POST['Payment_status']; // 手動選已繳款/未繳款
 
-    if ($Order_ID) {
-        // 取得舊的訂單狀態和主鍵 id
-        $sql_old = "SELECT id, Order_status FROM ordershop WHERE Order_ID = ?";
-        $stmt_old = $link->prepare($sql_old);
-        $stmt_old->bind_param("s", $Order_ID);
-        $stmt_old->execute();
-        $result_old = $stmt_old->get_result();
-        $order = $result_old->fetch_assoc();
-        $ordershop_id = $order['id'] ?? null;
-        $old_status = $order['Order_status'] ?? '';
-        $stmt_old->close();
+    // 從付款方式自動判定
+    $sql_payment = "SELECT Payment_method FROM ordershop WHERE Order_ID = ?";
+    $stmt = $link->prepare($sql_payment);
+    $stmt->bind_param("s", $order_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $payment_method = $row['Payment_method'];
 
-        // 更新訂單資料
-        $sql = "UPDATE ordershop 
-                SET Order_status = ?, Ship_Date = ?, Transport = ?, shipping_zip = ?
-                WHERE Order_ID = ?";
-        $stmt = $link->prepare($sql);
-        if ($stmt) {
-            $stmt->bind_param("sssss", $Order_status, $Ship_Date, $Transport, $shipping_zip, $Order_ID);
-            $success = $stmt->execute();
-            $stmt->close();
+    if ($payment_method === 'cc') {
+        $payment_status = '已繳款';
+    } elseif ($payment_method === 'cod') {
+        $payment_status = '未繳款';
+    }
 
-            // 若狀態有改變，且涉及「退貨」或「處理中」
-            if ($success && $ordershop_id && $old_status !== $Order_status) {
-                $sql_items = "SELECT product_id, quantity FROM order_items WHERE order_id = ?";
-                $stmt_items = $link->prepare($sql_items);
-                $stmt_items->bind_param("i", $ordershop_id);
-                $stmt_items->execute();
-                $result_items = $stmt_items->get_result();
+    // 查詢舊的訂單狀態及 DB 用的訂單 ID
+    $sql_old_status = "SELECT id, Order_status FROM ordershop WHERE Order_ID = ?";
+    $stmt = $link->prepare($sql_old_status);
+    $stmt->bind_param("s", $order_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result->num_rows === 0) {
+        echo "找不到訂單";
+        exit;
+    }
+    $order_row = $result->fetch_assoc();
+    $order_db_id = $order_row['id'];
+    $old_status = $order_row['Order_status'];
 
-                while ($item = $result_items->fetch_assoc()) {
-                    $product_id = $item['product_id'];
-                    $quantity = (int)$item['quantity'];
+    // 狀態改變時調整 Sell_quantity
+    if ($order_status !== $old_status) {
+        $sql_items = "SELECT product_id, quantity FROM order_items WHERE order_id = ?";
+        $stmt_items = $link->prepare($sql_items);
+        $stmt_items->bind_param("i", $order_db_id);
+        $stmt_items->execute();
+        $items_result = $stmt_items->get_result();
 
-                    if ($Order_status === '商品退貨') {
-                        // 減少 sell_quantity（但不得 < 0）
-                        $link->query("UPDATE product 
-                                      SET sell_quantity = GREATEST(sell_quantity - $quantity, 0) 
-                                      WHERE Product_ID = '$product_id'");
-                    } elseif ($Order_status === '訂單處理中') {
-                        // 增加 sell_quantity
-                        $link->query("UPDATE product 
-                                      SET sell_quantity = sell_quantity + $quantity 
-                                      WHERE Product_ID = '$product_id'");
-                    }
-                }
+        while ($item = $items_result->fetch_assoc()) {
+            $product_id = $item['product_id'];
+            $quantity = $item['quantity'];
 
-                $stmt_items->close();
+            if ($order_status === '商品退貨') {
+                $sql_update_sell = "UPDATE product SET Sell_quantity = Sell_quantity - ? WHERE id = ?";
+            } elseif ($order_status === '訂單處理中' || $order_status === '商品寄出') {
+                $sql_update_sell = "UPDATE product SET Sell_quantity = Sell_quantity + ? WHERE id = ?";
+            } else {
+                continue;
             }
 
-            echo "<script>alert('訂單資料已更新'); window.location.href='Order.php';</script>";
-        } else {
-            echo "<script>alert('資料庫連線失敗'); history.back();</script>";
+            $stmt_update = $link->prepare($sql_update_sell);
+            $stmt_update->bind_param("ii", $quantity, $product_id);
+            $stmt_update->execute();
+            $stmt_update->close();
         }
-    } else {
-        echo "<script>alert('缺少訂單編號'); history.back();</script>";
     }
-} else {
-    echo "<script>alert('無效的請求'); history.back();</script>";
+
+    // 更新訂單主資料
+    $sql = "UPDATE ordershop 
+            SET Order_status = ?, Ship_Date = ?, Transport = ?, shipping_zip = ?, Payment_status = ? 
+            WHERE Order_ID = ?";
+    $stmt = $link->prepare($sql);
+    $stmt->bind_param("ssssss", $order_status, $ship_date, $transport, $shipping_zip, $payment_status, $order_id);
+
+    if ($stmt->execute()) {
+        header("Location: Order.php?success=1");
+        exit();
+    } else {
+        echo "更新失敗：" . $stmt->error;
+    }
 }
 ?>
