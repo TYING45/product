@@ -5,7 +5,7 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-include("sql_php.php");
+include("sql_php.php"); // 請確認此檔案含有 $link MySQL 連線物件
 
 // 取得使用者角色與 Seller_ID
 $role = $_SESSION['role'] ?? '';
@@ -25,6 +25,10 @@ $selectedMonth = isset($_GET['month']) ? $_GET['month'] : $currentMonth;
 if (!in_array($selectedMonth, $months)) {
     $selectedMonth = $currentMonth;
 }
+
+// 商品類別清單
+$allTypes = ['家具','家電', '衣物','3C', '書','玩具','運動用品','其他'];
+$typeFilter = isset($_GET['type']) ? $_GET['type'] : '';
 
 // SQL 條件建構
 $typeCondition = '';
@@ -143,7 +147,6 @@ while ($row = $resultDetail->fetch_assoc()) {
                 </option>
             <?php endforeach; ?>
         </select>
-
     </form>
 
     <canvas id="salesChart" style="max-width: 700px; margin-top: 30px;"></canvas>
