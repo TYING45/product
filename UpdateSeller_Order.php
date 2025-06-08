@@ -223,18 +223,7 @@ $total_amount = $order['total_price'] + $shipping_fee; // 全訂單總價，保�
                             ?>
                         </select>
                     </td> 
-                    <td class="content">
-                        <select name="Payment_status" required>
-                        <?php
-                        $payment_statuses = ['未繳款', '已繳款'];
-                        foreach ($payment_statuses as $pay_status) {
-                        $selected = ($order['Payment_status'] ?? '') === $pay_status ? 'selected' : '';
-                        echo "<option value=\"$pay_status\" $selected>$pay_status</option>";
-        }
-        ?>
-    </select>
-</td>
-
+                    <td class="content"><?= htmlspecialchars($order['Payment_status'] ?? '') ?></td>
                     <td class="content">多項</td>
                     <td class="content"><input type="date" name="Ship_Date" value="<?= htmlspecialchars($order['Ship_Date'] ?? '') ?>"></td>
                     <td class="content"><input type="text" name="Transport" value="<?= htmlspecialchars($order['Transport'] ?? '') ?>"></td>
