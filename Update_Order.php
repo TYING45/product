@@ -98,7 +98,6 @@ $total_amount = $order['total_price'] + $shipping_fee;
             <a href="#" onclick="toggleMenu(event)">商品管理系統</a>
             <ul class="menuleft_hide">
                 <li><a href="#">商品類別</a></li>
-                <li><a href="Add_Product.php">新增商品</a></li>
                 <li><a href="Product.php">商品管理</a></li>
             </ul>
         </li>
