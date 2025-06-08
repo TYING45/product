@@ -3,10 +3,10 @@
 if (isset($_POST["action"]) && $_POST["action"] == "add") {
     include("sql_php.php");
 
-    $stmt = $link->prepare("INSERT INTO `admin `(`Admin_ID`, `Admin_name`, `username`, `password`, `email`, `phone`) 
+    $stmt = $link->prepare("INSERT INTO `admin `(`Admin_ID`, `Admin_name`, `username`, `password`, `Email`, `Phone`) 
                             VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
     $stmt->bind_param("ssssssss", $_POST["UserID"], $_POST["name"], $_POST["username"], $_POST["password"], 
-                      $_POST["email"], $_POST["phone"]);
+                      $_POST["Email"], $_POST["Phone"]);
     $stmt->execute();
 
     if ($stmt->affected_rows > 0) {
@@ -30,7 +30,7 @@ if (isset($_POST["action"]) && $_POST["action"] == "add") {
 <head>
 <link href="CSS/form.css" rel="stylesheet" type="text/css">
 <main>
-<p><b><font size="5">權限管理系統</font></b></p>
+<p><b><font size="5">新增管理員系統</font></b></p>
 <form method="POST" action="">
  <table id = "Permission" >
     <tr>
@@ -39,8 +39,8 @@ if (isset($_POST["action"]) && $_POST["action"] == "add") {
 		<tr><td>姓名</td><td><input type="text" name ="name"id="name" required></td></tr>
         <tr><td>帳號</td><td><input type="text" name ="username"id="username" required></td></tr>
 		<tr><td>密碼</td><td><input type="text" name ="password"id="password" required></td></tr>
-		<tr><td>電話</td><td><input type="text" name ="phone"id="phone" required></td></tr>
-		<tr><td>email</td><td><input type="text" name ="email"id="email" required></td></tr>
+		<tr><td>電話</td><td><input type="text" name ="Phone"id="Phone" required></td></tr>
+		<tr><td>email</td><td><input type="text" name ="Email"id="Email" required></td></tr>
 		<tr>
 		<td colspan="2" align="center">
 		< <td colspan="2" align="center">
