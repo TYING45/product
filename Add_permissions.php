@@ -28,7 +28,7 @@ if (isset($_POST["action"]) && $_POST["action"] == "add") {
 </head>
 <body>
 <head>
-<link href="CSS/form.css" rel="stylesheet" type="text/css">
+<link href="CSS/Add_Del.css" rel="stylesheet" type="text/css">
 <main>
 <h1>新增管理員系統</h1>
 <form method="POST" action="">
