@@ -229,7 +229,7 @@ $total_amount = $order['total_price'] + $shipping_fee;
                             ?>
                         </select>
                     </td>
-                   <input type="hidden" name="Payment_status" value="<?= htmlspecialchars($payment_status) ?>">
+                  <td class="content"><?= htmlspecialchars($order['Payment_status'] ?? '') ?></td>
                     <td class="content">多項</td>
                     <td class="content"><input type="date" name="Ship_Date" value="<?= htmlspecialchars($order['Ship_Date'] ?? '') ?>"></td>
                     <td class="content"><input type="text" name="Transport" value="<?= htmlspecialchars($order['Transport'] ?? '') ?>"></td>
