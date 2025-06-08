@@ -24,7 +24,7 @@ function getSellerOrderCount($link, $sellerId) {
     $stmt = $link->prepare("
         SELECT COUNT(DISTINCT o.id) AS total
         FROM ordershop o
-        JOIN order_items oi ON o.order = oi.order_ID
+        JOIN order_items oi ON o.id = oi.order_id
         JOIN product p ON oi.Product_ID = p.Product_ID
         WHERE p.Seller_ID = ?
     ");
