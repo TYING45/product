@@ -10,7 +10,7 @@ if (isset($_POST["action"]) && $_POST["action"] == "update") {
         $stmt = $link->prepare($sqli_query);
         if ($stmt) {
             $stmt->bind_param("sssssssss", $_POST["Seller_name"],$_POST["Company"], $_POST["username"], $_POST["password"],
-                $_POST["Phone"], $_POST["Email"], $_POST["Address"],$_POST["Seller_introduction]", $_POST["Seller_ID"]);
+                $_POST["Phone"], $_POST["Email"], $_POST["Address"],$_POST["Seller_introduction"], $_POST["Seller_ID"]);
             $stmt->execute();
             $stmt->close();
         }   
