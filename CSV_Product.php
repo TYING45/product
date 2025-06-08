@@ -7,11 +7,20 @@ if ($query->num_rows > 0) {
     $delimiter = ",";
     $fileName = 'product.csv';
 
-    echo "\xEF\xBB\xBF";
-    $fp = fopen('php://output', 'w');//防止亂碼
+    // 一定要在輸出任何內容前設定 Header
+    header("Content-Type: text/csv; charset=UTF-8");
+    header("Content-Disposition: attachment; filename=\"$fileName\"");
 
-    $fields = ['Product_ID','Seller_ID', 'Product_name','Type', 'price' ,'Product_introduction', 'quantity', 'Image', 'Remark','Sell_quantity'];
+    // 輸出 BOM 防止 Excel 顯示亂碼
+    echo "\xEF\xBB\xBF";
+
+    $fp = fopen('php://output', 'w'); // 開始輸出
+
+    // 欄位標題
+    $fields = ['Product_ID','Seller_ID', 'Product_name','Type', 'price', 'Product_introduction', 'quantity', 'Image', 'Remark','Sell_quantity'];
     fputcsv($fp, $fields, $delimiter);
+
+    // 每筆資料
     while ($row = $query->fetch_assoc()) {
         $lineData = [
             $row['Product_ID'],
@@ -21,15 +30,13 @@ if ($query->num_rows > 0) {
             $row['price'],
             $row['Product_introduction'],
             $row['quantity'],
-            $row['Image'].
+            $row['Image'],
             $row['Remark'],
             $row['Sell_quantity']
         ];
         fputcsv($fp, $lineData, $delimiter);
     }
-    header("Content-Type: text/csv; charset=UTF-8");
-    header("Content-Disposition: attachment; filename=$fileName");
-    fpassthru($fp);//輸出
+
     fclose($fp);
     exit;
 }
