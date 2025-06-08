@@ -129,7 +129,7 @@ $result = $stmt->get_result();
 
 <div id="top-menu">
     <ul class="topmenu">
-        <button onclick="toggleSidebar()" class="img-button"></button>
+        <button onclick="toggleSidebar()" class="img-button"></button> <li></li><li></li>
         <li><a href="#">網頁前端</a></li>
         <li><a href="logout.php">登出</a></li>
     </ul>
