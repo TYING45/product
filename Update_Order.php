@@ -85,7 +85,7 @@ $total_amount = $order['total_price'] + $shipping_fee;
 
 <div id="top-menu">
     <ul class="topmenu">
-        <button onclick="toggleSidebar()" class="img-button"></button>
+        <button onclick="toggleSidebar()" class="img-button"></button><li></li>
         <li><a href="https://secondhandshop.netlify.app/">網頁前端</a></li>
         <li><a href="login.php">登出</a></li>
     </ul>   
