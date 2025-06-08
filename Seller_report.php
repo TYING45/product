@@ -10,7 +10,6 @@ $role = $_SESSION['role'] ?? '';
 $sellerID = $_SESSION['Seller_ID'] ?? null;
 
 if ($role !== 'seller' || $sellerID === null) {
-    // 非賣家或無Seller_ID，拒絕訪問或導向
     header("Location: login.php");
     exit();
 }
@@ -28,7 +27,6 @@ if (!in_array($selectedMonth, $months)) {
 
 $allTypes = ['家具','家電', '衣物','3C', '書','玩具','運動用品','其他'];
 
-// 撈該賣家每個類別銷售數量
 $escapedSellerID = $link->real_escape_string($sellerID);
 $sql = "
     SELECT 
@@ -86,15 +84,57 @@ if ($detailedType && in_array($detailedType, $allTypes)) {
 <meta charset="UTF-8">
 <title>賣家銷售報表</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<link rel="stylesheet" href="CSS/original_table.css">
 <style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background: #fafafa;
+    color: #333;
+  }
+  h2, h3 {
+    margin-bottom: 12px;
+  }
+  form {
+    margin-bottom: 20px;
+  }
+  select {
+    padding: 4px 8px;
+    font-size: 14px;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 700px;
+    margin-bottom: 20px;
+    background: #fff;
+    border: 1px solid #ddd;
+  }
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px 12px;
+    text-align: left;
+  }
+  th {
+    background: #f0f0f0;
+  }
+  a.clickable {
+    color: #1a73e8;
+    text-decoration: none;
+  }
+  a.clickable:hover {
+    text-decoration: underline;
+  }
   #salesChart {
     max-width: 700px;
     max-height: 300px;
+    margin-bottom: 30px;
   }
-  .clickable {
-    cursor: pointer;
-    color: blue;
+  p > a {
+    color: #1a73e8;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  p > a:hover {
     text-decoration: underline;
   }
 </style>
