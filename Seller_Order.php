@@ -76,6 +76,20 @@ if ($month !== '') {
     $types .= "s";
 }
 
+// 付款狀態篩選
+if ($payment_status !== '') {
+    $where .= " AND Payment_status = ?";
+    $params[] = $payment_status;
+    $types .= "s";
+}
+
+// 訂單狀態篩選
+if ($order_status !== '') {
+    $where .= " AND Order_status = ?";
+    $params[] = $order_status;
+    $types .= "s";
+}
+
 $sql .= " ORDER BY o.Order_Date DESC LIMIT ? OFFSET ?";
 $params[] = $items_per_page;
 $params[] = $offset;
@@ -162,7 +176,20 @@ $result = $stmt->get_result();
             }
             ?>
         </select>
+        <select name="payment_status">
+            <option value="">全部付款狀態</option>
+            <option value="尚未付款" <?= $payment_status === '尚未付款' ? 'selected' : '' ?>>尚未付款</option>
+            <option value="已付款" <?= $payment_status === '已付款' ? 'selected' : '' ?>>已付款</option>
+        </select>
 
+        <select name="order_status">
+            <option value="">全部訂單狀態</option>
+            <option value="未處理" <?= $order_status === '未處理' ? 'selected' : '' ?>>未處理</option>
+            <option value="處理中" <?= $order_status === '處理中' ? 'selected' : '' ?>>處理中</option>
+            <option value="已出貨" <?= $order_status === '已出貨' ? 'selected' : '' ?>>已出貨</option>
+            <option value="已完成" <?= $order_status === '已完成' ? 'selected' : '' ?>>已完成</option>
+            <option value="已取消" <?= $order_status === '已取消' ? 'selected' : '' ?>>已取消</option>
+        </select>
         <input type="submit" value="查詢">
     </form>
 
