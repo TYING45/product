@@ -2,7 +2,7 @@
 if (isset($_POST["action"]) && $_POST["action"] == "add") {
     include("sql_php.php");
 
-    if (!empty($_POST["name"]) && !empty($_POST["phone"]) && !empty($_POST["email"]) &&
+    if (!empty($_POST["Seller_name"]) && !empty($_POST["phone"]) && !empty($_POST["email"]) &&
         !empty($_POST["username"]) && !empty($_POST["password"])) {
 
         // 取得最大編號數字（從 SXXX 擷取數字）
