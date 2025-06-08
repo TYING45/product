@@ -47,7 +47,7 @@ $orderCount = getCount($link, 'ordershop');
     <ul class="topmenu">
        <li> <button onclick="toggleSidebar()" class="img-button"></button></li>
        <li></li>
-        <li><a href="#">網頁前端</a></li>
+        <li><a href="https://secondhandshop.netlify.app/">網頁前端</a></li>
         <li><a href="logout.php">登出</a></li>
     </ul>   
 </div>
@@ -55,14 +55,6 @@ $orderCount = getCount($link, 'ordershop');
 <div id="leftside">
     <ul class="menuleft">
         <li><a href="index.php">首頁</a></li>
-        
-        <li>
-            <a href="#" onclick="toggleMenu(event)">網站管理系統</a>
-            <ul class="menuleft_hide">
-                <li><a href="#">網站管理</a></li>
-            </ul>
-        </li>
-
         <li>
             <a href="#" onclick="toggleMenu(event)">商品管理系統 <span class="count-badge"><?php echo $productCount; ?></span></a>
             <ul class="menuleft_hide">
@@ -77,8 +69,13 @@ $orderCount = getCount($link, 'ordershop');
                 <li><a href="Member.php">會員管理</a></li>
                 <li><a href="Add_Member.php">新增會員</a></li>
             </ul>
-        </li> <!-- 這裡少了這個關閉標籤 -->
-
+         <li>
+                <a href="#" onclick="toggleMenu(event)">管理員管理系統</a>
+                <ul class="menuleft_hide">
+                    <li><a href="Permissions.php">管理員管理</a></li>
+                    <li><a href="Add_permissions.php">新增管理員</a></li>
+                </ul>
+            </li>
         <li>
             <a href="#" onclick="toggleMenu(event)">賣家管理系統 <span class="count-badge"><?php echo $sellerCount; ?></span></a>
             <ul class="menuleft_hide">
@@ -86,14 +83,6 @@ $orderCount = getCount($link, 'ordershop');
                 <li><a href="Add_Seller.php">新增賣家</a></li>
             </ul>
         </li>
-        <li>
-                <a href="#" onclick="toggleMenu(event)">會員管理系統</a>
-                <ul class="menuleft_hide">
-                    <li><a href="Member.php">會員管理</a></li>
-                    <li><a href="Add_Member.php">新增會員</a></li>
-                </ul>
-            </li>
-        <li>
             <a href="#" onclick="toggleMenu(event)">訂單管理系統 <span class="count-badge"><?php echo $orderCount; ?></span></a>
             <ul class="menuleft_hide">
                 <li><a href="Order.php">訂單資料管理</a></li>
