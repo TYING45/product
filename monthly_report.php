@@ -4,38 +4,37 @@ if (!isset($_SESSION['username'])) {
     header("Location: login.php");
     exit();
 }
-include("sql_php.php"); // 你的資料庫連線檔
+include("sql_php.php");
 
-// 取得使用者角色與 Seller_ID
 $role = $_SESSION['role'] ?? '';
 $sellerID = $_SESSION['Seller_ID'] ?? null;
 
-// 取得當前月份，格式: YYYY-MM
 $currentMonth = date('Y-m');
-
-// 最近6個月
 $months = [];
 for ($i = 5; $i >= 0; $i--) {
     $months[] = date('Y-m', strtotime("-$i month"));
 }
 
-// 選擇的月份（預設本月）
 $selectedMonth = $_GET['month'] ?? $currentMonth;
 if (!in_array($selectedMonth, $months)) {
     $selectedMonth = $currentMonth;
 }
 
-// 商品類別（固定）
 $allTypes = ['家具','家電', '衣物','3C', '書','玩具','運動用品','其他'];
 
-// 賣家條件：seller只能看自己資料
+$typeFilter = $_GET['type'] ?? '';
+
+$typeCondition = '';
+if ($typeFilter && in_array($typeFilter, $allTypes)) {
+    $typeCondition = "AND p.Type = '" . $link->real_escape_string($typeFilter) . "'";
+}
+
 $sellerCondition = '';
 if ($role === 'seller' && $sellerID !== null) {
     $escapedSellerID = $link->real_escape_string($sellerID);
     $sellerCondition = "AND p.Seller_ID = '$escapedSellerID'";
 }
 
-// 撈每個類別銷售數量（只算已付款未取消）
 $sql = "
     SELECT 
         p.Type,
@@ -45,6 +44,7 @@ $sql = "
     JOIN ordershop o ON oi.order_id = o.id
     WHERE o.Order_status NOT IN ('取消', '未付款')
       AND DATE_FORMAT(o.Order_Date, '%Y-%m') = '{$link->real_escape_string($selectedMonth)}'
+      $typeCondition
       $sellerCondition
     GROUP BY p.Type
     ORDER BY p.Type
@@ -56,15 +56,12 @@ $data = [];
 while ($row = $result->fetch_assoc()) {
     $data[$row['Type']] = (int)$row['total_sold'];
 }
-
-// 確保每個類別都有欄位，即使沒銷售也顯示0
 foreach ($allTypes as $type) {
     if (!isset($data[$type])) {
         $data[$type] = 0;
     }
 }
 
-// 取得詳細類別查詢參數，點分類名稱會帶入
 $detailedType = $_GET['detail_type'] ?? '';
 $detailedData = [];
 
@@ -92,18 +89,57 @@ if ($detailedType && in_array($detailedType, $allTypes)) {
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
 <title>銷售報表</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<link rel="stylesheet" href="CSS/original_table.css"> <!-- 換成你原本的CSS檔案 -->
 <style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background: #fff;
+    color: #333;
+  }
+  h2, h3 {
+    margin-bottom: 12px;
+  }
+  form {
+    margin-bottom: 20px;
+  }
+  select {
+    padding: 4px 8px;
+    font-size: 14px;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 700px;
+    margin-bottom: 20px;
+  }
+  th, td {
+    border: 1px solid #ccc;
+    padding: 8px 12px;
+    text-align: left;
+  }
+  th {
+    background: #eee;
+  }
+  a.clickable {
+    color: #007bff;
+    text-decoration: none;
+  }
+  a.clickable:hover {
+    text-decoration: underline;
+  }
   #salesChart {
     max-width: 700px;
-    max-height: 300px;
+    max-height: 280px;
+    margin-bottom: 30px;
   }
-  .clickable {
-    cursor: pointer;
-    color: blue;
+  p > a {
+    color: #007bff;
+    text-decoration: none;
+  }
+  p > a:hover {
     text-decoration: underline;
   }
 </style>
@@ -112,21 +148,26 @@ if ($detailedType && in_array($detailedType, $allTypes)) {
 <main>
     <h2>銷售報表（<?php echo htmlspecialchars($selectedMonth); ?>）</h2>
 
-    <!-- 篩選月份 -->
     <form method="get" id="filterForm" action="monthly_report.php">
         <label for="month">月份：
             <select name="month" id="month" onchange="this.form.submit()">
                 <?php foreach ($months as $m): ?>
-                <option value="<?= $m ?>" <?= $m === $selectedMonth ? 'selected' : '' ?>><?= $m ?></option>
+                    <option value="<?= htmlspecialchars($m) ?>" <?= $m === $selectedMonth ? 'selected' : '' ?>><?= htmlspecialchars($m) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <label for="type">類別：
+            <select name="type" id="type" onchange="this.form.submit()">
+                <option value="" <?= $typeFilter === '' ? 'selected' : '' ?>>全部</option>
+                <?php foreach ($allTypes as $t): ?>
+                    <option value="<?= htmlspecialchars($t) ?>" <?= $typeFilter === $t ? 'selected' : '' ?>><?= htmlspecialchars($t) ?></option>
                 <?php endforeach; ?>
             </select>
         </label>
     </form>
 
-    <!-- 銷售數量條形圖 -->
     <canvas id="salesChart"></canvas>
 
-    <!-- 商品類別銷售量表 -->
     <table>
         <thead>
             <tr>
@@ -138,7 +179,7 @@ if ($detailedType && in_array($detailedType, $allTypes)) {
             <?php foreach ($data as $type => $qty): ?>
             <tr>
                 <td>
-                    <a href="?month=<?= htmlspecialchars($selectedMonth) ?>&detail_type=<?= urlencode($type) ?>" class="clickable">
+                    <a href="?month=<?= urlencode($selectedMonth) ?>&type=<?= urlencode($type) ?>&detail_type=<?= urlencode($type) ?>" class="clickable">
                         <?= htmlspecialchars($type) ?>
                     </a>
                 </td>
@@ -148,26 +189,25 @@ if ($detailedType && in_array($detailedType, $allTypes)) {
         </tbody>
     </table>
 
-    <!-- 詳細商品銷售明細 -->
     <?php if ($detailedType): ?>
-    <h3>「<?= htmlspecialchars($detailedType) ?>」類別詳細銷售量</h3>
-    <?php if ($detailedData): ?>
-    <table>
-        <thead>
-            <tr><th>商品名稱</th><th>銷售數量</th></tr>
-        </thead>
-        <tbody>
-        <?php foreach ($detailedData as $item): ?>
-            <tr>
-                <td><?= htmlspecialchars($item['Product_Name']) ?></td>
-                <td><?= (int)$item['qty_sold'] ?></td>
-            </tr>
-        <?php endforeach; ?>
-        </tbody>
-    </table>
-    <?php else: ?>
-        <p>該類別無銷售資料。</p>
-    <?php endif; ?>
+        <h3><?= htmlspecialchars($detailedType) ?> 類別詳細銷售量</h3>
+        <?php if ($detailedData): ?>
+        <table>
+            <thead>
+                <tr><th>商品名稱</th><th>銷售數量</th></tr>
+            </thead>
+            <tbody>
+            <?php foreach ($detailedData as $item): ?>
+                <tr>
+                    <td><?= htmlspecialchars($item['Product_Name']) ?></td>
+                    <td><?= (int)$item['qty_sold'] ?></td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+        <?php else: ?>
+            <p>該類別無銷售資料。</p>
+        <?php endif; ?>
     <?php endif; ?>
 
     <p><a href="<?php echo ($role === 'admin') ? 'index.php' : 'Seller_index.php'; ?>">回首頁</a></p>
@@ -181,7 +221,7 @@ const salesChart = new Chart(ctx, {
         datasets: [{
             label: '銷售數量',
             data: <?php echo json_encode(array_values($data)); ?>,
-            backgroundColor: '#3498db',
+            backgroundColor: '#007bff',
             barPercentage: 0.6,
             categoryPercentage: 0.7,
         }]
