@@ -3,6 +3,12 @@ include("sql_php.php");
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $order_id = $_POST['Order_ID'];
+    $order_id = $_POST['Order_ID'] ?? $_GET['Order_ID'] ?? null;
+
+if (!$order_id) {
+    echo "缺少 Order_ID";
+    exit;
+}
     $order_status = $_POST['Order_status'];
     $ship_date = $_POST['Ship_Date'];
     $transport = $_POST['Transport'];
