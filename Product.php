@@ -68,7 +68,7 @@ function keepURL() {
     <ul class="topmenu">
        <li> <button onclick="toggleSidebar()" class="img-button"></button></li>
        <li></li>
-        <li><a href="#">網頁前端</a></li>
+        <li><a href="https://secondhandshop.netlify.app/">網頁前端</a></li>
         <li><a href="logout.php">登出</a></li>
     </ul>   
 </div>
@@ -80,12 +80,6 @@ function keepURL() {
         <ul class="menuleft">
             <li>
                 <a href="index.php">首頁</a>
-            </li>
-            <li>
-                <a href="#" onclick="toggleMenu(event)">網站管理系統</a>
-                <ul class="menuleft_hide">
-                    <li><a href="#">網站管理</a></li>
-                </ul>
             </li>
             <li>
                 <a href="#" onclick="toggleMenu(event)">商品管理系統</a>
