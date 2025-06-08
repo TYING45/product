@@ -56,7 +56,7 @@ $orderCount = getCount($link, 'ordershop');
     <ul class="menuleft">
         <li><a href="index.php">首頁</a></li>
         <li>
-            <a href="#" onclick="toggleMenu(event)">商品管理系統 <span class="count-badge"><?php echo $productCount; ?></span></a>
+            <a href="#" onclick="toggleMenu(event)">商品管理系統</a>
             <ul class="menuleft_hide">
                 <li><a href="Add_Product.php">新增商品</a></li>
                 <li><a href="Product.php">商品管理</a></li>
@@ -64,7 +64,7 @@ $orderCount = getCount($link, 'ordershop');
         </li>
 
         <li>
-            <a href="#" onclick="toggleMenu(event)">會員管理系統 <span class="count-badge"><?php echo $memberCount; ?></span></a>
+            <a href="#" onclick="toggleMenu(event)">會員管理系統 </a>
             <ul class="menuleft_hide">
                 <li><a href="Member.php">會員管理</a></li>
                 <li><a href="Add_Member.php">新增會員</a></li>
@@ -77,7 +77,7 @@ $orderCount = getCount($link, 'ordershop');
                 </ul>
             </li>
         <li>
-            <a href="#" onclick="toggleMenu(event)">賣家管理系統 <span class="count-badge"><?php echo $sellerCount; ?></span></a>
+            <a href="#" onclick="toggleMenu(event)">賣家管理系統</a>
             <ul class="menuleft_hide">
                 <li><a href="Seller.php">賣家管理</a></li>
                 <li><a href="Add_Seller.php">新增賣家</a></li>
