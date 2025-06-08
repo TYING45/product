@@ -38,7 +38,7 @@ if (isset($_POST["action"]) && $_POST["action"] == "add") {
 </head>
 <body>
 <main>
-    <p><b><font size="5">賣家管理系統</font></b></p>
+    <h1>賣家管理系統</h1>
     <form method="POST" action="">
         <table id="Add_Member">
             <tr><th>欄位</th><th>資料</th></tr>
