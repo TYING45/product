@@ -77,14 +77,14 @@ $orderCount = getCount($link, 'ordershop');
         </li>
 
         <li>
-            <a href="#" onclick="toggleMenu(event)">商品管理系統 <span class="count-badge"><?php echo $productCount; ?></span></a>
+            <a href="#" onclick="toggleMenu(event)">商品管理系統 </a>
             <ul class="menuleft_hide">
                 <li><a href="SellerAdd_Product.php">新增商品</a></li>
                 <li><a href="Seller_Product.php">商品管理</a></li>
             </ul>
         </li>
         <li>
-            <a href="#" onclick="toggleMenu(event)">訂單管理系統 <span class="count-badge"><?php echo $orderCount; ?></span></a>
+            <a href="#" onclick="toggleMenu(event)">訂單管理系統 </a>
             <ul class="menuleft_hide">
                 <li><a href="Seller_Order.php">訂單資料管理</a></li>
             </ul>
