@@ -21,6 +21,8 @@ $stmtSeller->execute();
 $resultSeller = $stmtSeller->get_result();
 if ($resultSeller->num_rows === 0) {
     die("查無賣家資料");
+    sleep(3);
+    header("Location: Seller_Product.php"); 
 }
 $sellerData = $resultSeller->fetch_assoc();
 $sellerID = $sellerData['Seller_ID'];
@@ -62,6 +64,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST["action"]) && $_POST["
         $ext = strtolower(pathinfo($_FILES["Image"]["name"], PATHINFO_EXTENSION));
         if (!in_array($ext, $allowed_ext)) {
             die("圖片格式錯誤！");
+            sleep(3);
+           header("Location: Seller_Product.php"); 
         }
 
         $image_name = uniqid() . "." . $ext;
