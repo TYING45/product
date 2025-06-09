@@ -8,7 +8,7 @@ if (!isset($_SESSION["Seller_ID"])) {
     exit();
 }
 
-$Seller_ID = $_SESSION["Seller_ID"]; // 從 session 取得登入者的 Seller_ID
+$Seller_ID = $_SESSION["Seller_ID"]; //session  Seller_ID
 
 // 資料更新處理
 if (isset($_POST["action"]) && $_POST["action"] == "update") {
