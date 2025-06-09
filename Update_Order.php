@@ -234,11 +234,11 @@ $total_amount = $order['total_price'] + $shipping_fee;
                 $order_status = $order['Order_status'] ?? '';
 
                 if ($payment_method === 'cc') {
-                echo '已繳款';
+                $Payment_status = '已繳款';
                 } elseif ($payment_method === 'cod' && $order_status === '結案') {
-                echo '已繳款';
+                $Payment_status = '已繳款';
                 } else {
-                echo '尚未繳款';
+                $Payment_status = '已繳款';
                 }
                 ?>
                 </td>
