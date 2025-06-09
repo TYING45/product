@@ -55,6 +55,8 @@ input[type="text"] {
 .input6 { top: 220px; left: 60%; }
 .labels7 { top: 260px; left: 5%; }
 .input7 { top: 260px; left: 15%; }
+.labels8 { top: 260px; left: 50%; }
+.input8 { top: 260px; left: 60%; }
 
 textarea {
     width: 90%;
