@@ -77,6 +77,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST["action"]) && $_POST["
         }
     } else {
         die("請選擇圖片上傳！");
+        sleep(3);
+       header("Location: Seller_Product.php"); 
     }
 
     $stmt = $link->prepare("INSERT INTO product 
@@ -102,6 +104,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST["action"]) && $_POST["
         exit();
     } else {
         die("新增商品失敗：" . $stmt->error);
+        
+        header("Location: Seller_Product.php");
     }
 }
 ?>
