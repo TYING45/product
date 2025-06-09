@@ -5,7 +5,7 @@ if (isset($_POST["action"]) && $_POST["action"] == "add") {
     // 修正欄位順序正確對應 SQL 語句
     $stmt = $link->prepare("INSERT INTO `seller`(`Seller_ID`, `Seller_name`, `Company`, `username`, `password`, `email`, `phone`, `Address`, `Seller_introduction`) 
                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("ssssssss", 
+    $stmt->bind_param("sssssssss", 
         $_POST["Seller_ID"], 
         $_POST["Seller_name"], 
         $_POST["Company"], 
