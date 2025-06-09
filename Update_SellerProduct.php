@@ -107,8 +107,8 @@ if (isset($_POST["action"]) && $_POST["action"] == "update") {
                 $_POST["Product_introduction"], 
                 $image_name, 
                 $_POST["Remark"], 
-                $_POST["Product_ID"],
-                $_POST["discount"]              
+                $_POST["discount"],  
+                $_POST["Product_ID"]            
             );
             $stmt->execute();
             $stmt->close();
