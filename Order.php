@@ -77,16 +77,6 @@ $count_stmt->close();
 
 $total_pages = ceil($total_rows / $per_page);
 
- $ordershop_id = $order['id'];
-$payment_method = $order['Payment_method'];
-     if ($payment_method === 'cod') {
-    $Payment_status = '尚未繳款';}
-   if ($payment_method === 'cc' || $Order_status === '結案') {
-    $Payment_status = '已繳款';
-    } else {
-    $Payment_status = '尚未繳款';
-    }
-
 // 查詢訂單資料
 $sql = "SELECT * FROM ordershop $where ORDER BY Order_ID DESC LIMIT ?, ?";
 $params[] = $offset;
