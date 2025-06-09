@@ -112,7 +112,6 @@ function keepURL() {
             <li><a href="#" onclick="toggleMenu(event)">訂單管理系統</a>
             <ul class="menuleft_hide">
                     <li><a href="Order.php">訂單資料管理</a></li>
-                    <li><a href="Time_Order.php">歷史訂單管理</a></li>
                 </ul>
             </li>   
         </ul>
