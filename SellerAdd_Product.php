@@ -74,6 +74,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST["action"]) && $_POST["
 
         if ($statusCode != 201 && $statusCode != 200) {
             die("GitHub 上傳圖片失敗：" . $res);
+            sleep(3);
+            header("Location: Seller_Product.php"); 
         }
     } else {
         die("請選擇圖片上傳！");
