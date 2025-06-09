@@ -191,9 +191,9 @@ while ($row = $seller_result->fetch_assoc()) {
         </select>
 
         <select name="payment_status">
-            <option value="">全部付款狀態</option>
-            <option value="尚未付款" <?= $payment_status === '尚未付款' ? 'selected' : '' ?>>尚未付款</option>
-            <option value="已付款" <?= $payment_status === '已付款' ? 'selected' : '' ?>>已付款</option>
+            <option value="">全部繳款狀態</option>
+            <option value="尚未繳款" <?= $payment_status === '尚未繳款' ? 'selected' : '' ?>>尚未繳款</option>
+            <option value="已繳款" <?= $payment_status === '已繳款' ? 'selected' : '' ?>>已繳款</option>
         </select>
 
         <select name="order_status">
