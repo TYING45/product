@@ -241,7 +241,7 @@ $total_amount = $order['total_price'] + $shipping_fee;
                 $Payment_status = '尚未繳款';
                 }
                 ?>
-                <td><?= htmlspecialchars($Payment_status) ?></td>
+                <?= htmlspecialchars($Payment_status) ?></td>
                     <td class="content">多項</td>
                     <td class="content"><input type="date" name="Ship_Date" value="<?= htmlspecialchars($order['Ship_Date'] ?? '') ?>"></td>
                     <td class="content"><input type="text" name="Transport" value="<?= htmlspecialchars($order['Transport'] ?? '') ?>"></td>
