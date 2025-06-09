@@ -103,7 +103,8 @@ $total_amount = $order['total_price'] + $shipping_fee; // 全訂單總價，保�
     <ul class="topmenu">
        <li> <button onclick="toggleSidebar()" class="img-button"></button></li>
        <li></li>
-        <li><a href="#">網頁前端</a></li>
+        <li><a href="https://secondhandshop.netlify.app/">網頁前端</a></li>
+        <li><a href="Seller_data.php">賣家資料</a></li>
         <li><a href="logout.php">登出</a></li>
     </ul>   
 </div>
