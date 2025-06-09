@@ -92,13 +92,6 @@ $orderCount = getSellerOrderCount($link, $sellerId);
 <div id="leftside">
     <ul class="menuleft">
         <li><a href="Seller_index.php">首頁</a></li>
-        
-        <li>
-            <a href="#" onclick="toggleMenu(event)">網站管理系統</a>
-            <ul class="menuleft_hide">
-                <li><a href="#">網站管理</a></li>
-            </ul>
-        </li>
 
         <li>
             <a href="#" onclick="toggleMenu(event)">商品管理系統 <span class="count-badge"><?php echo $productCount; ?></span></a>
