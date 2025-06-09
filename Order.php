@@ -229,20 +229,7 @@ while ($row = $seller_result->fetch_assoc()) {
                 <tr>
                     <td><?= htmlspecialchars($row['Order_ID']) ?></td>
                     <td><?= htmlspecialchars($row['Order_Date']) ?></td>
-                   <td>
-<?php
-$payment_method = $order['Payment_method'] ?? '';
-$order_status = $order['Order_status'] ?? '';
-
-if ($payment_method === 'cc') {
-    echo '已繳款';
-} elseif ($payment_method === 'cod' && $order_status === '結案') {
-    echo '已繳款';
-} else {
-    echo '尚未繳款';
-}
-?>
-</td>
+                   <td><?= htmlspecialchars($row['Payment_status'] ?? '') ?></td>
                     <td><?= htmlspecialchars($row['Order_status'] ?? '未處理') ?></td>
                     <td><?= number_format(($row['total_price'] ?? 0) + ($row['shipping_fee'] ?? 0), 2) ?></td>
                     <td><a href="Update_Order.php?Order_ID=<?= urlencode($row['Order_ID']) ?>">查看</a></td>
