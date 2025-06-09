@@ -238,7 +238,7 @@ $total_amount = $order['total_price'] + $shipping_fee;
                 } elseif ($payment_method === 'cod' && $order_status === '結案') {
                 $Payment_status = '已繳款';
                 } else {
-                $Payment_status = '已繳款';
+                $Payment_status = '尚未繳款';
                 }
                 ?>
                 </td>
