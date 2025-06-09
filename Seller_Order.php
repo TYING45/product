@@ -63,6 +63,15 @@ $result = $stmt->get_result();
 $total_rows = $result->fetch_assoc()['total'] ?? 0;
 $total_pages = ceil($total_rows / $items_per_page);
 
+ $ordershop_id = $order['id'];
+    $payment_method = $order['Payment_method'];
+     if ($payment_method === 'cod') {
+    $Payment_status = '尚未繳款';}
+   if ($payment_method === 'cc' || $Order_status === '結案') {
+    $Payment_status = '已繳款';
+    } else {
+    $Payment_status = '尚未繳款';
+    }
 // 主查詢：取出訂單 + 該賣家商品總額
 $sql = "
     SELECT DISTINCT o.*, 
