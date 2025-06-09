@@ -228,7 +228,7 @@ while ($row = $seller_result->fetch_assoc()) {
                 <tr>
                     <td><?= htmlspecialchars($row['Order_ID']) ?></td>
                     <td><?= htmlspecialchars($row['Order_Date']) ?></td>
-                    <td><?= htmlspecialchars($row['Payment_status'] ?? '尚未付款') ?></td>
+                    <td><?= htmlspecialchars($row['Payment_status'] ?? '') ?></td>
                     <td><?= htmlspecialchars($row['Order_status'] ?? '未處理') ?></td>
                     <td><?= number_format(($row['total_price'] ?? 0) + ($row['shipping_fee'] ?? 0), 2) ?></td>
                     <td><a href="Update_Order.php?Order_ID=<?= urlencode($row['Order_ID']) ?>">查看</a></td>
