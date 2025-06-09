@@ -99,7 +99,7 @@ if (isset($_POST["action"]) && $_POST["action"] == "update") {
         $sql_query = "UPDATE product SET Product_name=?, Type=?, price=?, quantity=?, Product_introduction=?, Image=?, Remark=?,discount=? WHERE Product_ID=?";
         $stmt = $link->prepare($sql_query);
         if ($stmt) {
-            $stmt->bind_param("ssiissssi", 
+            $stmt->bind_param("ssiisssis", 
                 $_POST["Product_name"], 
                 $_POST["Type"], 
                 $_POST["price"], 
