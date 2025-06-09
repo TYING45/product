@@ -107,7 +107,7 @@ if (isset($_POST["action"]) && $_POST["action"] == "update") {
             $stmt->close();
         }
 
-        header("Location: Seller_Product.php");
+        header("Location:Product.php");
         exit();
     } else {
         echo "❌ 錯誤：有欄位未填。";
