@@ -43,7 +43,6 @@ if (isset($_POST["action"]) && $_POST["action"] == "add") {
 		<tr><td>email</td><td><input type="text" name ="Email"id="Email" required></td></tr>
 		<tr>
 		<td colspan="2" align="center">
-		< <td colspan="2" align="center">
                     <input name="action" type="hidden" value="add">
                     <input type="button" value="取消" onclick="location.href='Permissions.php'">
                     <input type="submit" value="新增資料">
