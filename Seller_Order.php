@@ -218,7 +218,7 @@ $result = $stmt->get_result();
                 <tr>
                     <td><?= htmlspecialchars($order['Order_ID']) ?></td>
                     <td><?= htmlspecialchars($order['Order_Date']) ?></td>
-                    <td><?= htmlspecialchars($order['Payment_status'] ?? '尚未付款') ?></td>
+                    <td><?= htmlspecialchars($order['Payment_status'] ?? '') ?></td>
                     <td><?= htmlspecialchars($order['Order_status'] ?? '') ?></td>
                     <td><?= htmlspecialchars(number_format($order['seller_total'], 2)) ?></td>
                     <td><a href="UpdateSeller_Order.php?Order_ID=<?= urlencode($order['Order_ID']) ?>">查看</a></td>
