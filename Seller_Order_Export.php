@@ -58,7 +58,7 @@ while ($row = $result->fetch_assoc()) {
         $row['Order_ID'],
         $row['Order_Date'],
         $row['Member_ID'],
-        $row['Payment_status'] ?? '尚未付款',
+        $row['Payment_status'] ?? '',
         $row['Order_status'] ?? '未處理',
         number_format($row['total_amount'], 2),
     ]);
