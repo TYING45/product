@@ -218,7 +218,7 @@ $result = $stmt->get_result();
                 <tr>
                     <td><?= htmlspecialchars($order['Order_ID']) ?></td>
                     <td><?= htmlspecialchars($order['Order_Date']) ?></td>
-                     <?php
+                     <td><?php
                         $payment_method = $order['Payment_method'] ?? '';
                         $order_status = $order['Order_status'] ?? '';
 
