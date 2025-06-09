@@ -218,7 +218,20 @@ $result = $stmt->get_result();
                 <tr>
                     <td><?= htmlspecialchars($order['Order_ID']) ?></td>
                     <td><?= htmlspecialchars($order['Order_Date']) ?></td>
-                    <td><?= htmlspecialchars($order['Payment_status'] ?? '') ?></td>
+                    <td>
+<?php
+$payment_method = $order['Payment_method'] ?? '';
+$order_status = $order['Order_status'] ?? '';
+
+if ($payment_method === 'cc') {
+    echo '已繳款';
+} elseif ($payment_method === 'cod' && $order_status === '結案') {
+    echo '已繳款';
+} else {
+    echo '尚未繳款';
+}
+?>
+</td>
                     <td><?= htmlspecialchars($order['Order_status'] ?? '') ?></td>
                     <td><?= htmlspecialchars(number_format($order['seller_total'], 2)) ?></td>
                     <td><a href="UpdateSeller_Order.php?Order_ID=<?= urlencode($order['Order_ID']) ?>">查看</a></td>
