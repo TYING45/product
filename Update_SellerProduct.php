@@ -168,7 +168,7 @@ if (isset($_GET["id"])) {
     <input class="input4" type="text" name="quantity" value="<?php echo htmlspecialchars($quantity ?? ''); ?>" /><br />
     
     <label class="labels5">折扣 (%):</label> 
-    <input class="input5" type="number" name="discount" value="<?php echo $discount; ?>" min="0" max="100" required><br><br>
+    <input class="input5" type="text" name="discount" value="<?php echo $discount; ?>" min="0" max="100" required><br><br>
 
     <label>商品種類:</label><br>
     <select name="Type" required>
