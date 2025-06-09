@@ -50,6 +50,12 @@ if (isset($_POST["action"]) && $_POST["action"] == "update") {
     if (!empty($_POST["Product_ID"]) && !empty($_POST["Product_name"]) && !empty($_POST["price"]) &&
         !empty($_POST["quantity"]) && !empty($_POST["Product_introduction"]) && !empty($_POST["Type"])) {
         
+        $discount = $_POST["discount"];
+        if ($discount < 0 || $discount > 100) {
+            echo "<script>alert('折扣請輸入 0 到 100 之間的數字'); history.back();</script>";
+            exit();
+        }
+        
         $image_name = "";
 
         if (isset($_FILES["Image"]) && !empty($_FILES["Image"]["name"])) {
@@ -90,10 +96,10 @@ if (isset($_POST["action"]) && $_POST["action"] == "update") {
         }
 
         // 更新資料庫
-        $sql_query = "UPDATE product SET Product_name=?, Type=?, price=?, quantity=?, Product_introduction=?, Image=?, Remark=? WHERE Product_ID=?";
+        $sql_query = "UPDATE product SET Product_name=?, Type=?, price=?, quantity=?, Product_introduction=?, Image=?, Remark=?,discount=? WHERE Product_ID=?";
         $stmt = $link->prepare($sql_query);
         if ($stmt) {
-            $stmt->bind_param("ssiissss", 
+            $stmt->bind_param("ssiissssi", 
                 $_POST["Product_name"], 
                 $_POST["Type"], 
                 $_POST["price"], 
@@ -101,7 +107,8 @@ if (isset($_POST["action"]) && $_POST["action"] == "update") {
                 $_POST["Product_introduction"], 
                 $image_name, 
                 $_POST["Remark"], 
-                $_POST["Product_ID"]
+                $_POST["Product_ID"],
+                $_POST["discount"]              
             );
             $stmt->execute();
             $stmt->close();
@@ -117,11 +124,11 @@ if (isset($_POST["action"]) && $_POST["action"] == "update") {
 // 讀取舊資料
 if (isset($_GET["id"])) {
     $Product_ID = $_GET["id"];
-    $sql_select = "SELECT Product_name, Type, price, quantity, Product_introduction, Image, Remark FROM product WHERE Product_ID = ?";
+    $sql_select = "SELECT Product_name, Type, price, quantity, Product_introduction, Image, Remark,discount FROM product WHERE Product_ID = ?";
     $stmt = $link->prepare($sql_select);
     $stmt->bind_param("s", $Product_ID);
     $stmt->execute();
-    $stmt->bind_result($Product_name, $Type, $price, $quantity, $Product_introduction, $Image, $Remark);
+    $stmt->bind_result($Product_name, $Type, $price, $quantity, $Product_introduction, $Image, $Remark,$discount);
     if ($stmt->fetch()) {
         $stmt->close();
     }
@@ -159,6 +166,9 @@ if (isset($_GET["id"])) {
 
     <label class="labels4">庫存數量：</label>
     <input class="input4" type="text" name="quantity" value="<?php echo htmlspecialchars($quantity ?? ''); ?>" /><br />
+    
+    <label class="labels5">折扣 (%):</label> 
+    <input class="input5" type="number" name="discount" value="<?php echo $discount; ?>" min="0" max="100" required><br><br>
 
     <label>商品種類:</label><br>
     <select name="Type" required>
