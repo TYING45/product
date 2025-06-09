@@ -114,7 +114,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['id']) && isset($_POST
                 </ul>
             </li>
             <li>
-                <a href="#" onclick="toggleMenu(event)">管理員系統</a>
+                <a href="#" onclick="toggleMenu(event)">賣家管理系統</a>
                 <ul class="menuleft_hide">
                     <li><a href="Seller.php">賣家管理</a></li>
                     <li><a href="Add_Seller.php">新增賣家</a></li>
