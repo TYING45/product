@@ -30,7 +30,7 @@ if ($result->num_rows > 0) {
     $fp = fopen('php://output', 'w');
 
     // CSV 欄位
-    $fields = ['Product_ID','Seller_ID', 'Product_name','Type', 'price' ,'Product_introduction', 'quantity', 'Image', 'Remark','Sell_quantity'];
+    $fields = ['Product_ID','Seller_ID', 'Product_name','Type', 'price' ,'Product_introduction', 'quantity', 'Image', 'Remark','Sell_quantity',`discount`];
     fputcsv($fp, $fields, $delimiter);
 
     while ($row = $result->fetch_assoc()) {
@@ -44,7 +44,8 @@ if ($result->num_rows > 0) {
             $row['quantity'],
             $row['Image'],
             $row['Remark'],
-            $row['Sell_quantity']
+            $row['Sell_quantity'],
+            $row['discount']
         ];
         fputcsv($fp, $lineData, $delimiter);
     }
