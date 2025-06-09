@@ -230,9 +230,8 @@ while ($row = $seller_result->fetch_assoc()) {
                     <td><?= htmlspecialchars($row['Order_ID']) ?></td>
                     <td><?= htmlspecialchars($row['Order_Date']) ?></td>
                    <td><?php
-                        $payment_method = $order['Payment_method'] ?? '';
-                        $order_status = $order['Order_status'] ?? '';
-
+                        $payment_method = $row['Payment_method'] ?? '';
+                        $order_status = $row['Order_status'] ?? '';
                         if ($payment_method === 'cc') {
                         $Payment_status = '已繳款';
                         } elseif ($payment_method === 'cod' && $order_status === '結案') {
