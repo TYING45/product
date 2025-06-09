@@ -31,7 +31,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $ordershop_id = $order['id'];
     $payment_method = $order['Payment_method'];
-
+     if ($payment_method === 'cod') {
+    $Payment_status = '尚未繳款';}
    if ($payment_method === 'cc' || $Order_status === '結案') {
     $Payment_status = '已繳款';
     } else {
