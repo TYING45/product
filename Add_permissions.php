@@ -4,8 +4,8 @@ if (isset($_POST["action"]) && $_POST["action"] == "add") {
     include("sql_php.php");
 
     $stmt = $link->prepare("INSERT INTO `admin `(`Admin_ID`, `Admin_name`, `username`, `password`, `Email`, `Phone`) 
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("ssssssss", $_POST["UserID"], $_POST["name"], $_POST["username"], $_POST["password"], 
+                            VALUES (?, ?, ?, ?, ?,?)");
+    $stmt->bind_param("ssssss", $_POST["UserID"], $_POST["name"], $_POST["username"], $_POST["password"], 
                       $_POST["Email"], $_POST["Phone"]);
     $stmt->execute();
 
