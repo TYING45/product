@@ -20,7 +20,7 @@ if ($result->num_rows > 0) {
     $delimiter = ",";
     $fileName = 'product_' . date('Ymd_His') . '.csv';
 
-    // 輸出 CSV header，必須在 fopen 前設定 header
+    // 輸出 CSV header
     header("Content-Type: text/csv; charset=UTF-8");
     header("Content-Disposition: attachment; filename=\"$fileName\"");
 
@@ -44,7 +44,7 @@ if ($result->num_rows > 0) {
             $row['quantity'],
             $row['Image'],
             $row['Remark'],
-            $row['Sell_quantity]
+            $row['Sell_quantity']
         ];
         fputcsv($fp, $lineData, $delimiter);
     }
