@@ -8,6 +8,11 @@ use Dotenv\Dotenv;
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
+// 清理檔名函數
+function clean_filename($filename) {
+    return preg_replace("/[^a-zA-Z0-9_\-\.]/", "_", basename($filename));
+}
+
 // 處理圖片：下載遠端或搬移本地
 function handle_image($imageField, &$errors, $productId, $productName) {
     $uploadDir = "uploads/";
@@ -48,7 +53,7 @@ function handle_image($imageField, &$errors, $productId, $productName) {
     return $imageName;
 }
 
-// 取得 GitHub 上檔案的 SHA（更新用）
+// 取得 GitHub 上檔案的 （更新用）
 function get_file_sha_from_github($path) {
     $token = $_ENV['GITHUB_TOKEN'];
     $owner = $_ENV['GITHUB_REPO_OWNER'] ?? 'TYING45';
@@ -111,7 +116,8 @@ function upload_to_github($filename, $content) {
     curl_close($ch);
 
     if ($httpStatus < 200 || $httpStatus >= 300) {
-        error_log("GitHub Upload Failed: HTTP $httpStatus\n$result");
+        echo "<h3>GitHub 上傳失敗 (HTTP $httpStatus)：</h3><pre>$result</pre>";
+        exit();
     }
 }
 
@@ -136,16 +142,17 @@ if (isset($_POST['output'])) {
             $errors = [];
 
             while (($row = fgetcsv($csvFile)) !== FALSE) {
-                $Product_ID = $row[0];
-                $Seller_ID = $row[1];
-                $Product_name = $row[2];
-                $Type = $row[3]; 
-                $quantity = intval($row[4]);
-                $Product_introduction = $row[5];
-                $price = intval($row[6]);
-                $Image = $row[7];
-                $Remark = $row[8];
-                $Sell_quantity = $row[9];
+                if (count($row) < 10) {
+                    $errors[] = "❌ 欄位數不足：" . implode(",", $row);
+                    continue;
+                }
+
+                [$Product_ID, $Seller_ID, $Product_name, $Type, $quantity, $Product_introduction, 
+                 $price, $Image, $Remark, $Sell_quantity] = $row;
+
+                $quantity = intval($quantity);
+                $price = intval($price);
+                $Sell_quantity = intval($Sell_quantity);
 
                 $imageFilename = handle_image($Image, $errors, $Product_ID, $Product_name);
 
@@ -180,11 +187,12 @@ if (isset($_POST['output'])) {
             // 上傳 CSV 到 GitHub
             upload_to_github($csvFilename, $csvContent);
 
-            // 寫入錯誤 log
+            // 錯誤顯示與記錄
             if (!empty($errors)) {
-                file_put_contents("upload_errors.log", implode("\n", $errors));
+                file_put_contents("upload_errors.log", implode("\n", $errors) . "\n", FILE_APPEND);
                 echo "<h3>圖片處理錯誤：</h3><ul><li>" . implode("</li><li>", $errors) . "</li></ul>";
-                exit(); // 顯示錯誤後停止，不 redirect
+                $link->close();
+                exit();
             }
 
         } else {
@@ -195,6 +203,7 @@ if (isset($_POST['output'])) {
     }
 }
 
+$link->close();
 header("Location: Seller_Product.php");
 exit();
 ?>
