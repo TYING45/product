@@ -77,11 +77,13 @@ $stmt->close();
     
     <label class="labels6">E-mail:</label> 
     <input class="input6" type="text" name="Email" value="<?php echo htmlspecialchars($Email); ?>" required><br>
+    <label class="labels7">公司:</label> 
+    <input class="input7" type="text" name="Company" value="<?php echo htmlspecialchars($Company); ?>" required><br>
     <br>
     <label>地址:</label><br>
     <textarea name="Address" rows="2" cols="100"><?php echo htmlspecialchars($Address); ?></textarea><br> 
     <br>
-    <label>賣家介紹</label> 
+    <label>賣家介紹</label><br> 
     <textarea name="Seller_introduction" rows="3" cols="100" required><?php echo htmlspecialchars($Seller_introduction); ?></textarea><br> 
 
     <input type="button" value="取消" onclick="location.href='Seller_index.php'">    
