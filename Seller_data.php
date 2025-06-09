@@ -38,8 +38,7 @@ if (isset($_POST["action"]) && $_POST["action"] == "update") {
 }
 
 // 取得現有資料並填入表單
-$sql_select = "SELECT Seller_name, Company, username, password, Phone, Email, Address, Seller_introduction 
-               FROM seller WHERE Seller_ID = ?";
+$sql_select = "SELECT Seller_name, Company, username, password, Phone, Email, Address, Seller_introduction FROM seller WHERE Seller_ID = ?";
 $stmt = $link->prepare($sql_select);
 $stmt->bind_param("s", $Seller_ID);
 $stmt->execute();
@@ -78,10 +77,10 @@ $stmt->close();
     
     <label class="labels6">E-mail:</label> 
     <input class="input6" type="text" name="Email" value="<?php echo htmlspecialchars($Email); ?>" required><br>
-    
+    <br>
     <label>地址:</label><br>
     <textarea name="Address" rows="2" cols="100"><?php echo htmlspecialchars($Address); ?></textarea><br> 
-
+    <br>
     <label>賣家介紹</label> 
     <textarea name="Seller_introduction" rows="3" cols="100" required><?php echo htmlspecialchars($Seller_introduction); ?></textarea><br> 
 
