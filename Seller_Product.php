@@ -5,6 +5,8 @@ include("sql_php.php");
 // 檢查是否登入，允許賣家或管理員進入
 if (!isset($_SESSION['role']) || ($_SESSION['role'] !== 'seller' && $_SESSION['role'] !== 'admin')) {
     echo "未授權訪問。請先登入為賣家或管理員帳號。";
+    sleep(3)
+    header("Location: login.php")
     exit();
 }
 
