@@ -229,6 +229,7 @@ while ($row = $seller_result->fetch_assoc()) {
                 <tr>
                     <td><?= htmlspecialchars($row['Order_ID']) ?></td>
                     <td><?= htmlspecialchars($row['Order_Date']) ?></td>
+                    <td>
                     <?php
                         $payment_method = $order['Payment_method'] ?? '';
                         $order_status = $order['Order_status'] ?? '';
