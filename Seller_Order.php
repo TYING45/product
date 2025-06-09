@@ -131,6 +131,7 @@ $result = $stmt->get_result();
     <ul class="topmenu">
         <button onclick="toggleSidebar()" class="img-button"></button> <li></li><li></li>
         <li><a href="#">網頁前端</a></li>
+        li><a href="Seller_data.php">賣家資料</a></li>
         <li><a href="logout.php">登出</a></li>
     </ul>
 </div>
