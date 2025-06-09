@@ -182,7 +182,7 @@ $result = $stmt->get_result();
             ?>
         </select>
         <select name="payment_status">
-            <option value="">全部付款狀態</option>
+            <option value="">全部繳款狀態</option>
             <option value="尚未繳款" <?= $payment_status === '尚未繳款' ? 'selected' : '' ?>>尚未繳款</option>
             <option value="已繳款" <?= $payment_status === '已繳款' ? 'selected' : '' ?>>已繳款</option>
         </select>
