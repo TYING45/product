@@ -139,6 +139,7 @@ function keepURL() {
         <tr>
             <th>圖片</th>
             <th>商品ID</th>
+	    <th賣家ID</th>>
             <th>商品名稱</th>
             <th>商品種類</th>
             <th>價格</th>
@@ -154,6 +155,7 @@ function keepURL() {
             <tr>
                 <td><img src="uploads/<?php echo htmlspecialchars($row["Image"] ?: "default.png"); ?>" width="100"></td>
                 <td><?= htmlspecialchars($row['Product_ID']) ?></td>
+		<td><?= htmlspecialchars($row['Seller_ID']) ?></td>    
                 <td><?= htmlspecialchars($row['Product_name']) ?></td>
                 <td><?= htmlspecialchars($row['Type']) ?></td>
                 <td><?= htmlspecialchars($row['price']) ?></td>
