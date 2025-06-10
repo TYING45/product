@@ -132,7 +132,6 @@ function keepURL() {
                value="<?= htmlspecialchars($_GET['keyword'] ?? '') ?>">
         <input type="submit" value="查詢">
         <input type="button" onclick="location.href='CSV_Product.php'" value="輸出CSV">
-        <input type="button" onclick="location.href='Upload_Product.html'" value="上傳資料">
     </form>
 
     <table border="1" cellspacing="0" cellpadding="5">
