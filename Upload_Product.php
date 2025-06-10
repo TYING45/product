@@ -147,6 +147,6 @@ if (isset($_POST['output'])) {
     }
 }
 
-header("Location: Product.php");
+header("Location: Seller_Product.php");
 exit();
 ?>
