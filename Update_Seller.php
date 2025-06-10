@@ -74,7 +74,7 @@ if (isset($_GET["id"])) {
     <br>
     <label>地址:</label><br>
     <textarea name="Address" rows="2" cols="100"><?php echo $Address; ?></textarea><br> 
-    <label>賣家介紹</label> 
+    <label>賣家介紹</label><br> 
     <textarea name="Seller_introduction" rows="3" cols="100"><?php echo $Seller_introduction; ?></textarea><br> 
     <input type="button" value="取消" onclick="location.href='Seller.php'">    
     <button type="submit">更新</button>
