@@ -5,7 +5,7 @@ if (isset($_POST["action"]) && $_POST["action"] == "add") {
 
     $stmt = $link->prepare("INSERT INTO `admin `(`Admin_ID`, `Admin_name`, `username`, `password`, `Email`, `Phone`) 
                             VALUES (?, ?, ?, ?, ?,?)");
-    $stmt->bind_param("ssssss", $_POST["UserID"], $_POST["name"], $_POST["username"], $_POST["password"], 
+    $stmt->bind_param("ssssss", $_POST["Admin_ID"], $_POST["Admin_name"], $_POST["username"], $_POST["password"], 
                       $_POST["Email"], $_POST["Phone"]);
     $stmt->execute();
 
@@ -35,8 +35,8 @@ if (isset($_POST["action"]) && $_POST["action"] == "add") {
  <table id = "Permission" >
     <tr>
         <th>欄位</th><th>資料</th></tr>
-		<tr><td>管理員編號</td><td><input type="text" name ="UserID"id="UserID" required></td></tr>
-		<tr><td>姓名</td><td><input type="text" name ="name"id="name" required></td></tr>
+		<tr><td>管理員編號</td><td><input type="text" name ="Admin_ID"id="Admin_ID" required></td></tr>
+		<tr><td>姓名</td><td><input type="text" name ="Admin_name"id="Admin_name" required></td></tr>
         	<tr><td>帳號</td><td><input type="text" name ="username"id="username" required></td></tr>
 		<tr><td>密碼</td><td><input type="text" name ="password"id="password" required></td></tr>
 		<tr><td>電話</td><td><input type="text" name ="Phone"id="Phone" required></td></tr>
