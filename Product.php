@@ -139,7 +139,7 @@ function keepURL() {
         <tr>
             <th>圖片</th>
             <th>商品ID</th>
-	    <th賣家ID</th>>
+	    <th>賣家ID</th>>
             <th>商品名稱</th>
             <th>商品種類</th>
             <th>價格</th>
