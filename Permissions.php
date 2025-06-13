@@ -68,8 +68,6 @@ function keepURL() {
 <div id="leftside">
     <ul class="menuleft">
         <li><a href="index.php">首頁</a></li>
-        <li><a href="#" onclick="toggleMenu(event)">網站管理系統</a>
-            <ul class="menuleft_hide"><li><a href="#">網站管理</a></li></ul></li>
         <li><a href="#" onclick="toggleMenu(event)">商品管理系統</a>
             <ul class="menuleft_hide">
                 <li><a href="Product.php">商品管理</a></li>
@@ -92,7 +90,6 @@ function keepURL() {
         <li><a href="#" onclick="toggleMenu(event)">訂單管理系統</a>
             <ul class="menuleft_hide">
                 <li><a href="Order.php">訂單資料管理</a></li>
-                <li><a href="Time_Order.php">歷史訂單管理</a></li>
             </ul></li>
     </ul>
 </div>
@@ -135,7 +132,7 @@ function keepURL() {
                 <td><?= $row["username"] ?></td>
                 <td>********</td>
                 <td><a href="Update_Admin.php?id=<?= $row["Admin_ID"] ?>">修改</a></td>
-                <td><a href="Userdelete.php?id=<?= $row["Admin_ID"] ?>">刪除</a></td>
+                <td><a href="Del_Permissions.php?id=<?= $row["Admin_ID"] ?>">刪除</a></td>
             </tr>
         <?php endwhile; ?>
     </table>
