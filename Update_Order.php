@@ -137,7 +137,6 @@ $total_amount = $order['total_price'] + $shipping_fee;
         <table>
             <tr><td class="label">訂單編號</td><td class="content"><?= htmlspecialchars($order['Order_ID']) ?></td></tr>
             <tr><td class="label">訂購日期</td><td class="content"><?= htmlspecialchars($order['Order_Date']) ?></td></tr>
-            <tr><td class="label">訂購人姓名</td><td class="content"><?= htmlspecialchars($seller['Seller_Name'] ?? '未知') ?></td></tr>
             <tr><td class="label">聯絡電話</td><td class="content"><?= htmlspecialchars($seller['Phone'] ?? '未知') ?></td></tr>
             <tr><td class="label">e-mail</td><td class="content"><?= htmlspecialchars($seller['Email'] ?? '未知') ?></td></tr>
             <tr><td class="label">付款方式</td><td class="content"><?= htmlspecialchars($order['Payment_method'] ?? '尚未付款') ?></td></tr>
