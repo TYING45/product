@@ -128,7 +128,7 @@ function keepURL() {
     <?php endif; ?>
 
     <form method="GET" action="Product.php">
-        <input name="keyword" type="text" placeholder="請輸入關鍵字(ID、商品名稱、商品種類)" size="20"
+        <input name="keyword" type="text" placeholder="請輸入關鍵字(商品ID、賣家ID、商品名稱、商品種類)" size="20"
                value="<?= htmlspecialchars($_GET['keyword'] ?? '') ?>">
         <input type="submit" value="查詢">
         <input type="button" onclick="location.href='CSV_Product.php'" value="輸出CSV">
