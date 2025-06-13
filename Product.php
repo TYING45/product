@@ -133,13 +133,12 @@ function keepURL() {
         <input type="submit" value="查詢">
         <input type="button" onclick="location.href='CSV_Product.php'" value="輸出CSV">
     </form>
-
     <table border="1" cellspacing="0" cellpadding="5">
         <thead>
         <tr>
             <th>圖片</th>
             <th>商品ID</th>
-	    <th>賣家ID</th>>
+	    <th>賣家ID</th>
             <th>商品名稱</th>
             <th>商品種類</th>
             <th>價格</th>
